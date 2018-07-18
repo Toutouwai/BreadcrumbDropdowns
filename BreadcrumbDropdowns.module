@@ -27,7 +27,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 			'version' => '0.1.0',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
-			'icon' => 'refresh',
+			'icon' => 'bars',
 			'autoload' => 'template=admin',
 			'requires' => array(
 				'ProcessWire>=3.0.83',
