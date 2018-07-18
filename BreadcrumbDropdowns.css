@@ -1,5 +1,6 @@
 /* Breadcrumb dividers */
 .uk-breadcrumb .pw-panel { margin-right:-8px; } /* The uneven space after the tree icon bugs me */
+.uk-breadcrumb li { font-size:0.875rem; }
 .uk-breadcrumb > li::before { content:none !important; }
 .uk-breadcrumb .dropdown-toggle { display:inline-block; color:#d2d4d9; width:21px; height:21px; margin:0 6px 7px; position:relative; bottom:-1px; }
 .uk-breadcrumb .dropdown-toggle i { position:relative; left:2px; bottom:1px; }
