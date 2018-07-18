@@ -21,7 +21,3 @@ There is a checkbox option in the module config that determines if the breadcrum
 ## Incompatibilities
 
 This module replaces the `AdminThemeUikit::renderBreadcrumbs` method so will potentially be incompatible with other modules that hook the same method.
-
-Known incompatible modules:
-
-* AdminThemeBoss (with extended breadcrumb option enabled)
