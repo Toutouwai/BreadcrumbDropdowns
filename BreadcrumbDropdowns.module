@@ -29,8 +29,6 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',
 			'autoload' => 'template=admin',
-			// Removed 'requires' condition below because of issue with PW modules directory?
-			// 'ProcessWire>=3.0.83',
 			'requires' => 'AdminThemeUikit',
 		);
 	}
