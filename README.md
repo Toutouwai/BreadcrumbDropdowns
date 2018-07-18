@@ -17,3 +17,11 @@ There is a checkbox option in the module config that determines if the breadcrum
 * In the dropdown menus the current page and the current page's parents are highlighted in a crimson colour to make it easier to quickly locate them in case you want to edit the next or previous sibling page.
 * If the option to include uneditable pages is selected then those pages are indicated by a reduced text opacity and the "not-allowed" cursor is shown on hover.
 * There is a limit of 25 sibling pages per dropdown for performance reasons and to avoid the dropdown becoming unwieldy.
+
+## Incompatibilities
+
+This module replaces the `AdminThemeUikit::renderBreadcrumbs` method so will potentially be incompatible with other modules that hook the same method.
+
+Known incompatible modules:
+
+* AdminThemeBoss
