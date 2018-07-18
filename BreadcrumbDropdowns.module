@@ -1,0 +1,143 @@
+<?php namespace ProcessWire;
+
+/**
+ *
+ * Breadcrumb Dropdowns
+ *
+ * @author Robin Sallis
+ *
+ * ProcessWire 3.x
+ * Copyright (C) 2011 by Ryan Cramer
+ * Licensed under GNU/GPL v2, see LICENSE.TXT
+ *
+ * http://www.processwire.com
+ * http://www.ryancramer.com
+ *
+ */
+
+class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule {
+
+	/**
+	 * Module information
+	 */
+	public static function getModuleInfo() {
+		return array(
+			'title' => 'Breadcrumb Dropdowns',
+			'summary' => 'Adds dropdown menus of page edit links to the breadcrumbs in Page Edit.',
+			'version' => '0.1.0',
+			'author' => 'Robin Sallis',
+			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
+			'icon' => 'refresh',
+			'autoload' => 'template=admin',
+			'requires' => array(
+				'ProcessWire>=3.0.83',
+				'AdminThemeUikit',
+			)
+		);
+	}
+
+	/**
+	 * Ready
+	 */
+	public function ready() {
+		$this->addHookBefore('ProcessPageEdit::buildForm', $this, 'addDependencies');
+		$this->addHookBefore('AdminThemeUikit::renderBreadcrumbs', $this, 'modifyBreadcrumbs');
+	}
+
+	/**
+	 * Modify breadcrumbs
+	 * @param HookEvent $event
+	 */
+	protected function modifyBreadcrumbs(HookEvent $event) {
+
+		$process = $this->wire()->process;
+		// Only for ProcessPageEdit
+		if($process != 'ProcessPageEdit') return;
+
+		$event->replace = true;
+		/* @var AdminThemeUikit $atu */
+		$atu = $event->object;
+		/* @var ProcessPageEdit $process */
+		$page = $process->getPage();
+		// Get parents of edited page
+		$parents = $page->parents;
+
+		// Modified code from AdminThemeUikit::renderBreadcrumbs
+		if(!$this->wire('user')->isLoggedIn() || $this->wire('input')->get('modal')) {
+			$event->return = '';
+			return;
+		}
+		$breadcrumbs = $this->wire('breadcrumbs');
+		$out = '';
+		if(strpos($this->layout, 'sidenav') === false) {
+			$out .= "<li>" . $atu->renderQuickTreeLink() . "</li>";
+		}
+		foreach($breadcrumbs as $key => $breadcrumb) {
+			// Get corresponding parent page
+			$parent = $parents->get($key);
+			$title = $breadcrumb->get('titleMarkup');
+			if(!$title) $title = $this->wire('sanitizer')->entities1($this->_($breadcrumb->title));
+			$out .= "<li><span class='dropdown-toggle' data-id='$parent->id'><i class='fa fa-fw fa-angle-right'></i></span><a href='$breadcrumb->url'>$title</a>";
+			$out .= $this->getBreadcrumbDropdown($parent) . "</li>";
+		}
+		// Add edited page as last breadcrumb item
+		$out .= "<li><span class='dropdown-toggle' data-id='$parent->id'><i class='fa fa-fw fa-angle-right'></i></span>$page->title";
+		$out .= $this->getBreadcrumbDropdown($page) . "</li>";
+		$out = "<ul class='uk-breadcrumb'>$out</ul>";
+
+		$event->return = $out;
+
+	}
+
+	/**
+	 * Get siblings of a page for breadcrumb dropdown
+	 *
+	 * @param Page $page
+	 * @return string
+	 */
+	protected function getBreadcrumbDropdown($page) {
+		$out = '';
+		foreach($page->siblings('limit=25') as $child) {
+			$class = $child === $page ? " class='current'" : '';
+			if($child->editable) {
+				$out .= "<li$class><a href='$child->editUrl'>$child->title</a></li>";
+			} elseif($this->show_uneditable) {
+				$out .= "<li$class><span class='uneditable'><span>$child->title</span></span></li>";
+			}
+		}
+		// If there are no editable items, add a note
+		if(!$out) $out .= "<li><span class='uneditable'><span>" . $this->_('No editable pages') ."</span></span></li>";
+		if($out) $out = "<ul class='breadcrumb-dropdown'>$out</ul>";
+		return $out;
+	}
+
+	/**
+	 * Add JS and CSS dependencies
+	 *
+	 * @param HookEvent $event
+	 */
+	protected function addDependencies(HookEvent $event) {
+		// Add JS and CSS
+		$config = $this->wire('config');
+		$info = $this->getModuleInfo();
+		$version = $info['version'];
+		$config->scripts->add($config->urls->{$this} . "{$this}.js?v={$version}");
+		$config->styles->add($config->urls->{$this} . "{$this}.css?v={$version}");
+	}
+
+	/**
+	 * Config inputfields
+	 *
+	 * @param InputfieldWrapper $inputfields
+	 */
+	public function getModuleConfigInputfields($inputfields) {
+		/* @var InputfieldCheckbox $f */
+		$f = $this->wire('modules')->InputfieldCheckbox;
+		$f_name = 'show_uneditable';
+		$f->name = $f_name;
+		$f->label = $this->_('Include uneditable pages in dropdowns');
+		$f->checked = $this->$f_name === 1 ? 'checked' : '';
+		$inputfields->add($f);
+	}
+
+}
