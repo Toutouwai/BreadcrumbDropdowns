@@ -24,4 +24,4 @@ This module replaces the `AdminThemeUikit::renderBreadcrumbs` method so will pot
 
 Known incompatible modules:
 
-* AdminThemeBoss
+* AdminThemeBoss (with extended breadcrumb option enabled)
