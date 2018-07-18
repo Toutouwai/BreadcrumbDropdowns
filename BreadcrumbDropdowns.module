@@ -29,6 +29,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',
 			'autoload' => 'template=admin',
+			'requires' => 'ProcessWire>=3.0.83, AdminThemeUikit'
 		);
 	}
 
