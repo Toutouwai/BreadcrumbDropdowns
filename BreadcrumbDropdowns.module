@@ -30,7 +30,8 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 			'icon' => 'bars',
 			'autoload' => 'template=admin',
 			'requires' => array(
-				'ProcessWire>=3.0.83',
+				// Removed 'requires' condition below because of issue with PW modules directory?
+				// 'ProcessWire>=3.0.83',
 				'AdminThemeUikit',
 			)
 		);
