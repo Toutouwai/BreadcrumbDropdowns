@@ -2,7 +2,7 @@
 
 A module for ProcessWire CMS/CMF. Adds dropdown menus of page edit links to the breadcrumbs in Page Edit.
 
-![Breadcrumb Dropdowns](https://user-images.githubusercontent.com/1538852/42858329-215a56c6-8aa2-11e8-8cd2-da2edbab2904.gif)
+![Breadcrumb Dropdowns](https://user-images.githubusercontent.com/1538852/43057136-6c2467a0-8e94-11e8-8f3c-5fc406f0b17d.gif)
 
 
 ## Installation
