@@ -24,7 +24,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		return array(
 			'title' => 'Breadcrumb Dropdowns',
 			'summary' => 'Adds dropdown menus of page edit links to the breadcrumbs in Page Edit.',
-			'version' => '0.1.1',
+			'version' => '0.1.2',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',
@@ -50,6 +50,8 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		$process = $this->wire()->process;
 		// Only for ProcessPageEdit
 		if($process != 'ProcessPageEdit') return;
+		// Only for the main execute method
+		if($this->wire()->input->urlSegment1) return;
 
 		/* @var AdminThemeUikit $atu */
 		$atu = $event->object;
