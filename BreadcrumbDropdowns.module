@@ -24,7 +24,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		return array(
 			'title' => 'Breadcrumb Dropdowns',
 			'summary' => 'Adds dropdown menus of page edit links to the breadcrumbs in Page Edit.',
-			'version' => '0.1.3',
+			'version' => '0.1.4',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',
@@ -47,23 +47,17 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 	 */
 	protected function modifyBreadcrumbs(HookEvent $event) {
 
-		$process = $this->wire()->process;
-		// Only for ProcessPageEdit
-		if($process != 'ProcessPageEdit') return;
-		// Only for the main execute method
-		if($this->wire()->input->urlSegment1) return;
+		// Activate dropdowns?
+		if(!$this->activateDropdowns()) return;
 
+		$event->replace = true;
 		/* @var AdminThemeUikit $atu */
 		$atu = $event->object;
-		/* @var ProcessPageEdit $process */
-		$page = $process->getPage();
-		// Return if cannot get $page (e.g. no edit access)
-		if(!$page) return;
-		// Return if this is the Home page (it has no siblings for a dropdown)
-		if($page->id === 1) return;
+
+		// Get edited page
+		$page = $this->wire()->process->getPage();
 		// Get parents of edited page
 		$parents = $page->parents;
-		$event->replace = true;
 
 		// Modified code from AdminThemeUikit::renderBreadcrumbs
 		if(!$this->wire('user')->isLoggedIn() || $this->wire('input')->get('modal')) {
@@ -120,16 +114,38 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 	 * @param HookEvent $event
 	 */
 	protected function addDependencies(HookEvent $event) {
-		$page = $event->object->getPage();
-		// Return if this is the Home page (it has no siblings for a dropdown)
-		if($page->id === 1) return;
+
+		// Activate dropdowns?
+		if(!$this->activateDropdowns()) return;
 
 		// Add JS and CSS
-		$config = $this->wire('config');
+		$config = $this->wire()->config;
 		$info = $this->getModuleInfo();
 		$version = $info['version'];
 		$config->scripts->add($config->urls->{$this} . "{$this}.js?v={$version}");
 		$config->styles->add($config->urls->{$this} . "{$this}.css?v={$version}");
+
+	}
+
+	/**
+	 * Should dropdowns be activated?
+	 *
+	 * @return boolean
+	 */
+	protected function activateDropdowns() {
+		$process = $this->wire()->process;
+		// No if not ProcessPageEdit
+		if($process != 'ProcessPageEdit') return false;
+		// No if not the main execute method
+		if($this->wire()->input->urlSegment1) return false;
+		/* @var ProcessPageEdit $process */
+		$page = $process->getPage();
+		// No if cannot get $page (e.g. no edit access)
+		if(!$page) return false;
+		// No if this is the Home page (it has no siblings for a dropdown)
+		if($page->id === 1) return false;
+		// Otherwise, yes
+		return true;
 	}
 
 	/**
