@@ -17,6 +17,7 @@ There is a checkbox option in the module config that determines if the breadcrum
 * In the dropdown menus the current page and the current page's parents are highlighted in a crimson colour to make it easier to quickly locate them in case you want to edit the next or previous sibling page.
 * If the option to include uneditable pages is selected then those pages are indicated by a reduced text opacity and the "not-allowed" cursor is shown on hover.
 * There is a limit of 25 sibling pages per dropdown for performance reasons and to avoid the dropdown becoming unwieldy.
+* If the current user is allowed to add new pages under the parent page an "Add New" link is shown at the bottom of the breadcrumb dropdown.
 
 ## Incompatibilities
 
