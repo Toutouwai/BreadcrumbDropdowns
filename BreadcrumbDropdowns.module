@@ -24,7 +24,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		return array(
 			'title' => 'Breadcrumb Dropdowns',
 			'summary' => 'Adds dropdown menus of page edit links to the breadcrumbs in Page Edit.',
-			'version' => '0.1.5',
+			'version' => '0.1.6',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',
@@ -105,6 +105,10 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		}
 		// If there are no editable items, add a note
 		if(!$out) $out .= "<li><span class='uneditable'><span>" . $this->_('No editable pages') ."</span></span></li>";
+		if($page->parent->id && $page->parent->addable) {
+			$add_new_url = $this->wire()->config->urls->admin . 'page/add/?parent_id=' . $page->parent->id;
+			$out .= "<li class='add-new'><a href='$add_new_url'><i class='fa fa-fw fa-plus-circle'></i> Add New</a></li>";
+		}
 		if($out) $out = "<ul class='breadcrumb-dropdown'>$out</ul>";
 		return $out;
 	}

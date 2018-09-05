@@ -14,3 +14,8 @@
 .uk-breadcrumb .breadcrumb-dropdown li .uneditable span { display:block; opacity:0.6; cursor:not-allowed; }
 .uk-breadcrumb .breadcrumb-dropdown li a:hover { text-decoration:none; background-color:#f0f3f7; }
 .uk-breadcrumb .breadcrumb-dropdown li.current .uneditable, .uk-breadcrumb .breadcrumb-dropdown li.current a { color:#e83561; }
+
+/* Add new */
+.uk-breadcrumb .breadcrumb-dropdown li.add-new a { background-color:#e7f6f2; }
+.uk-breadcrumb .breadcrumb-dropdown li.add-new a:hover { background-color:#d6f2ea; }
+.uk-breadcrumb .breadcrumb-dropdown li.add-new i { color:#3eb998; margin-left:-3px; }
