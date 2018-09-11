@@ -24,7 +24,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		return array(
 			'title' => 'Breadcrumb Dropdowns',
 			'summary' => 'Adds dropdown menus of page edit links to the breadcrumbs in Page Edit.',
-			'version' => '0.1.6',
+			'version' => '0.1.7',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',
@@ -88,29 +88,46 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 	}
 
 	/**
-	 * Get siblings of a page for breadcrumb dropdown
+	 * Get breadcrumb dropdown markup
 	 *
 	 * @param Page $page
 	 * @return string
 	 */
 	protected function getBreadcrumbDropdown($page) {
 		$out = '';
-		foreach($page->siblings('limit=25') as $child) {
-			$class = $child === $page ? " class='current'" : '';
+		foreach($this->getSiblings($page) as $child) {
+			$class = '';
+			$classes = array();
+			if($child === $page) $classes[] = 'page-current';
+			if($child->hasStatus('unpublished')) $classes[] = 'page-unpublished';
+			if($child->hasStatus('hidden')) $classes[] = 'page-hidden';
+			if(count($classes)) $class = " class='" . implode(' ', $classes) . "'";
 			if($child->editable) {
-				$out .= "<li$class><a href='$child->editUrl'>$child->title</a></li>";
+				$out .= "<li$class><a class='page-item' href='$child->editUrl'><span class='page-title'>$child->title</span></a></li>";
 			} elseif($this->show_uneditable) {
-				$out .= "<li$class><span class='uneditable'><span>$child->title</span></span></li>";
+				$out .= "<li$class><span class='page-item uneditable'><span class='page-title'>$child->title</span></span></li>";
 			}
 		}
 		// If there are no editable items, add a note
 		if(!$out) $out .= "<li><span class='uneditable'><span>" . $this->_('No editable pages') ."</span></span></li>";
 		if($page->parent->id && $page->parent->addable) {
 			$add_new_url = $this->wire()->config->urls->admin . 'page/add/?parent_id=' . $page->parent->id;
-			$out .= "<li class='add-new'><a href='$add_new_url'><i class='fa fa-fw fa-plus-circle'></i> Add New</a></li>";
+			$out .= "<li class='add-new'><a class='page-item' href='$add_new_url'><i class='fa fa-fw fa-plus-circle'></i> Add New</a></li>";
 		}
 		if($out) $out = "<ul class='breadcrumb-dropdown'>$out</ul>";
 		return $out;
+	}
+
+	/**
+	 * Get sibling pages for the current page
+	 *
+	 * @param Page $page
+	 * @return PageArray
+	 */
+	public function ___getSiblings($page) {
+		$siblings = $page->siblings('limit=25, include=all');
+		$siblings->filter('listable=1');
+		return $siblings;
 	}
 
 	/**

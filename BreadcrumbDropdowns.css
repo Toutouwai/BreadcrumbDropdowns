@@ -10,10 +10,12 @@
 .uk-breadcrumb li { position:relative; }
 .uk-breadcrumb .breadcrumb-dropdown { list-style:none; background-color:#fff; position:absolute; left:6px; top:28px; z-index:199; padding:0; box-shadow:0 1px 7px rgba(0,0,0,.175); border:1px solid #d9e1ea; border-bottom:none; display:none; }
 .uk-breadcrumb .breadcrumb-dropdown.visible { display:block; }
-.uk-breadcrumb .breadcrumb-dropdown li a, .uk-breadcrumb .breadcrumb-dropdown li .uneditable { color:#354b60; display:block; white-space:nowrap; padding:2px 10px 3px; border-bottom:1px solid #d9e1ea; }
-.uk-breadcrumb .breadcrumb-dropdown li .uneditable span { display:block; opacity:0.6; cursor:not-allowed; }
+.uk-breadcrumb .breadcrumb-dropdown li .page-item { color:#354b60; display:block; white-space:nowrap; padding:2px 10px 3px; border-bottom:1px solid #d9e1ea; }
+.uk-breadcrumb .breadcrumb-dropdown li .uneditable .page-title { cursor:not-allowed; font-style:italic; opacity:0.6; }
 .uk-breadcrumb .breadcrumb-dropdown li a:hover { text-decoration:none; background-color:#f0f3f7; }
-.uk-breadcrumb .breadcrumb-dropdown li.current .uneditable, .uk-breadcrumb .breadcrumb-dropdown li.current a { color:#e83561; }
+.uk-breadcrumb .breadcrumb-dropdown li.page-current .page-item { color:#e83561; }
+.uk-breadcrumb .breadcrumb-dropdown li.page-unpublished { text-decoration:line-through; }
+.uk-breadcrumb .breadcrumb-dropdown li.page-hidden .page-title { opacity:0.6; }
 
 /* Add new */
 .uk-breadcrumb .breadcrumb-dropdown li.add-new a { background-color:#e7f6f2; }
