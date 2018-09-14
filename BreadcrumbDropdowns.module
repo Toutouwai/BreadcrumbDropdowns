@@ -118,7 +118,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 			foreach($this->getSiblings($sibling) as $p) {
 				$class = '';
 				$classes = array();
-				if(!$is_parent && $p === $page) $classes[] = 'page-current';
+				if(!$is_parent && $p === $sibling) $classes[] = 'page-current';
 				if($p->hasStatus('unpublished')) $classes[] = 'page-unpublished';
 				if($p->hasStatus('hidden')) $classes[] = 'page-hidden';
 				if(count($classes)) $class = " class='" . implode(' ', $classes) . "'";
