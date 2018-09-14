@@ -14,10 +14,11 @@ There is a checkbox option in the module config that determines if the breadcrum
 ## Features/details
 
 * The module adds an additional breadcrumb item at the end for the currently edited page. That's because I think it's more intuitive for the dropdown under each breadcrumb item to show the item's sibling pages rather than the item's child pages.
+* If the currently edited page has children, a caret at the end of the breadcrumbs reveals a dropdown of up to the first 25 children.
 * In the dropdown menus the current page and the current page's parents are highlighted in a crimson colour to make it easier to quickly locate them in case you want to edit the next or previous sibling page.
 * Unpublished and hidden pages are indicated in the dropdowns with similar styling to that used in Page List.
 * If the option to include uneditable pages is selected then those pages are indicated by italics with a reduced text opacity and the "not-allowed" cursor is shown on hover.
-* There is a limit of 25 sibling pages per dropdown for performance reasons and to avoid the dropdown becoming unwieldy.
+* There is a limit of 25 pages per dropdown for performance reasons and to avoid the dropdown becoming unwieldy.
 * If the current user is allowed to add new pages under the parent page an "Add New" link is shown at the bottom of the breadcrumb dropdown.
 
 ## Overriding the listed siblings for a page
