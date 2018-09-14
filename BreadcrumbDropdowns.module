@@ -24,7 +24,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		return array(
 			'title' => 'Breadcrumb Dropdowns',
 			'summary' => 'Adds dropdown menus of page edit links to the breadcrumbs in Page Edit.',
-			'version' => '0.1.9',
+			'version' => '0.1.10',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',
@@ -86,9 +86,9 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		$out = "<ul class='uk-breadcrumb'>$out</ul>";
 
 		// Add children as last dropdown
-		if($page->numChildren) {
+		if($page->numChildren || $page->addable) {
 			$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span>";
-			$out .= $this->getBreadcrumbDropdown($page->child('include=all'), false) . "</li>";
+			$out .= $this->getBreadcrumbDropdown($page, true) . "</li>";
 			$out = "<ul class='uk-breadcrumb'>$out</ul>";
 		}
 
@@ -100,29 +100,41 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 	 * Get breadcrumb dropdown markup
 	 *
 	 * @param Page $page
+	 * @param bool $is_parent First argument is parent rather than sibling of desired dropdown pages
 	 * @return string
+	 * @throws WireException
 	 */
-	protected function getBreadcrumbDropdown($page, $highlight_current = true) {
+	protected function getBreadcrumbDropdown($page, $is_parent = false) {
+		// Determine $parent and $sibling
+		if($is_parent) {
+			$parent = $page;
+			$sibling = $page->child('include=all');
+		} else {
+			$parent = $page->parent;
+			$sibling = $page;
+		}
 		$out = '';
-		foreach($this->getSiblings($page) as $child) {
-			$class = '';
-			$classes = array();
-			if($highlight_current && $child === $page) $classes[] = 'page-current';
-			if($child->hasStatus('unpublished')) $classes[] = 'page-unpublished';
-			if($child->hasStatus('hidden')) $classes[] = 'page-hidden';
-			if(count($classes)) $class = " class='" . implode(' ', $classes) . "'";
-			if($child->editable) {
-				$out .= "<li$class><a class='page-item' href='$child->editUrl'><span class='page-title'>$child->title</span></a></li>";
-			} elseif($this->show_uneditable) {
-				$out .= "<li$class><span class='page-item uneditable'><span class='page-title'>$child->title</span></span></li>";
+		if($sibling->id) {
+			foreach($this->getSiblings($sibling) as $p) {
+				$class = '';
+				$classes = array();
+				if(!$is_parent && $p === $page) $classes[] = 'page-current';
+				if($p->hasStatus('unpublished')) $classes[] = 'page-unpublished';
+				if($p->hasStatus('hidden')) $classes[] = 'page-hidden';
+				if(count($classes)) $class = " class='" . implode(' ', $classes) . "'";
+				if($p->editable) {
+					$out .= "<li$class><a class='page-item' href='$p->editUrl'><span class='page-title'>$p->title</span></a></li>";
+				} elseif($this->show_uneditable) {
+					$out .= "<li$class><span class='page-item uneditable'><span class='page-title'>$p->title</span></span></li>";
+				}
 			}
 		}
-		// If there are no editable items, add a note
-		if(!$out) $out .= "<li><span class='uneditable'><span>" . $this->_('No editable pages') ."</span></span></li>";
-		if($page->parent->id && $page->parent->addable) {
+		if($parent->id && $parent->addable) {
 			$add_new_url = $this->wire()->config->urls->admin . 'page/add/?parent_id=' . $page->parent->id;
 			$out .= "<li class='add-new'><a class='page-item' href='$add_new_url'><i class='fa fa-fw fa-plus-circle'></i> Add New</a></li>";
 		}
+		// Add a note if no dropdown markup
+		if(!$out) $out .= "<li><span class='page-item uneditable'><span class='page-title'>" . $this->_('No editable pages') ."</span></span></li>";
 		if($out) $out = "<ul class='breadcrumb-dropdown'>$out</ul>";
 		return $out;
 	}
