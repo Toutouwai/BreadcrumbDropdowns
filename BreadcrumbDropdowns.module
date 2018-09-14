@@ -88,7 +88,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		// Add children as last dropdown
 		if($page->numChildren) {
 			$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span>";
-			$out .= $this->getBreadcrumbDropdown($page->child('include=all')) . "</li>";
+			$out .= $this->getBreadcrumbDropdown($page->child('include=all'), false) . "</li>";
 			$out = "<ul class='uk-breadcrumb'>$out</ul>";
 		}
 
@@ -102,12 +102,12 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 	 * @param Page $page
 	 * @return string
 	 */
-	protected function getBreadcrumbDropdown($page) {
+	protected function getBreadcrumbDropdown($page, $highlight_current = true) {
 		$out = '';
 		foreach($this->getSiblings($page) as $child) {
 			$class = '';
 			$classes = array();
-			if($child === $page) $classes[] = 'page-current';
+			if($highlight_current && $child === $page) $classes[] = 'page-current';
 			if($child->hasStatus('unpublished')) $classes[] = 'page-unpublished';
 			if($child->hasStatus('hidden')) $classes[] = 'page-hidden';
 			if(count($classes)) $class = " class='" . implode(' ', $classes) . "'";
