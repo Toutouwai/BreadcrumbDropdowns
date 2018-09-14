@@ -130,7 +130,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 			}
 		}
 		if($parent->id && $parent->addable) {
-			$add_new_url = $this->wire()->config->urls->admin . 'page/add/?parent_id=' . $page->parent->id;
+			$add_new_url = $this->wire()->config->urls->admin . 'page/add/?parent_id=' . $parent->id;
 			$out .= "<li class='add-new'><a class='page-item' href='$add_new_url'><i class='fa fa-fw fa-plus-circle'></i> Add New</a></li>";
 		}
 		// Add a note if no dropdown markup
