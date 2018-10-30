@@ -24,7 +24,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		return array(
 			'title' => 'Breadcrumb Dropdowns',
 			'summary' => 'Adds dropdown menus of page edit links to the breadcrumbs in Page Edit.',
-			'version' => '0.1.10',
+			'version' => '0.1.11',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',
@@ -70,18 +70,19 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		if(strpos($this->layout, 'sidenav') === false) {
 			$out .= "<li>" . $atu->renderQuickTreeLink() . "</li>";
 		}
+		$admin_url = $this->wire()->config->urls->admin;
 		foreach($breadcrumbs as $key => $breadcrumb) {
 			// Get corresponding parent page
 			$parent = $parents->get($key);
 			if(!$parent) continue;
 			$title = $breadcrumb->get('titleMarkup');
 			if(!$title) $title = $this->wire('sanitizer')->entities1($this->_($breadcrumb->title));
-			$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span><a href='".$this->wire('config')->urls->admin."page/?open=".$parent->id."'>$title</a>";
+			$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span><a href='{$admin_url}page/?open={$parent->id}'>$title</a>";
 			$out .= $this->getBreadcrumbDropdown($parent) . "</li>";
 		}
 
 		// Add edited page as extra breadcrumb item
-		$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span><a href='".$this->wire('config')->urls->admin."page/?open=".$page->id."'>".$page->title."</a>";
+		$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span><a href='{$admin_url}page/?open={$page->id}'>$page->title</a>";
 		$out .= $this->getBreadcrumbDropdown($page) . "</li>";
 		$out = "<ul class='uk-breadcrumb'>$out</ul>";
 
