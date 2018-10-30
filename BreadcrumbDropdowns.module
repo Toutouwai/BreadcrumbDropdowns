@@ -76,12 +76,12 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 			if(!$parent) continue;
 			$title = $breadcrumb->get('titleMarkup');
 			if(!$title) $title = $this->wire('sanitizer')->entities1($this->_($breadcrumb->title));
-			$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span><a href='$breadcrumb->url'>$title</a>";
+			$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span><a href='".$this->wire('config')->urls->admin."page/?open=".$parent->id."'>$title</a>";
 			$out .= $this->getBreadcrumbDropdown($parent) . "</li>";
 		}
 
 		// Add edited page as extra breadcrumb item
-		$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span>$page->title";
+		$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span><a href='".$this->wire('config')->urls->admin."page/?open=".$page->id."'>".$page->title."</a>";
 		$out .= $this->getBreadcrumbDropdown($page) . "</li>";
 		$out = "<ul class='uk-breadcrumb'>$out</ul>";
 
