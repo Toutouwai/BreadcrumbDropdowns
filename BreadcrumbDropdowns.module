@@ -24,7 +24,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		return array(
 			'title' => 'Breadcrumb Dropdowns',
 			'summary' => 'Adds dropdown menus of page edit links to the breadcrumbs in Page Edit.',
-			'version' => '0.1.12',
+			'version' => '0.1.13',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',
@@ -84,15 +84,14 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		// Add edited page as extra breadcrumb item
 		$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span><a href='{$admin_url}page/?open={$page->id}'>$page->title</a>";
 		$out .= $this->getBreadcrumbDropdown($page) . "</li>";
-		$out = "<ul class='uk-breadcrumb'>$out</ul>";
 
 		// Add children as last dropdown
 		if($page->numChildren || $page->addable) {
 			$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span>";
 			$out .= $this->getBreadcrumbDropdown($page, true) . "</li>";
-			$out = "<ul class='uk-breadcrumb'>$out</ul>";
 		}
 
+		$out = "<ul class='uk-breadcrumb'>$out</ul>";
 		$event->return = $out;
 
 	}
