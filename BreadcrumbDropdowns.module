@@ -24,7 +24,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		return array(
 			'title' => 'Breadcrumb Dropdowns',
 			'summary' => 'Adds dropdown menus of page edit links to the breadcrumbs in Page Edit.',
-			'version' => '0.1.13',
+			'version' => '0.1.14',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',
@@ -155,7 +155,8 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 			if($index > 12) $start = $index - 12;
 			if($num_siblings - $start < 25) $start = $num_siblings - 25;
 		}
-		$siblings = $page->siblings("start=$start, limit=25, include=all");
+		// Siblings excluding admin page and the 404 page
+		$siblings = $page->siblings("start=$start, limit=25, include=all, template!=admin, id!=27");
 		$siblings->filter('listable=1');
 		return $siblings;
 	}
