@@ -24,7 +24,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		return array(
 			'title' => 'Breadcrumb Dropdowns',
 			'summary' => 'Adds dropdown menus of page edit links to the breadcrumbs in Page Edit.',
-			'version' => '0.1.14',
+			'version' => '0.1.15',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',
@@ -206,8 +206,6 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		$page = $process->getPage();
 		// No if cannot get $page (e.g. no edit access)
 		if(!$page) return false;
-		// No if this is the Home page (it has no siblings for a dropdown)
-		if($page->id === 1) return false;
 		// Otherwise, yes
 		return true;
 	}
