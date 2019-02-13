@@ -24,7 +24,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		return array(
 			'title' => 'Breadcrumb Dropdowns',
 			'summary' => 'Adds dropdown menus of page edit links to the breadcrumbs in Page Edit.',
-			'version' => '0.1.15',
+			'version' => '0.1.16',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',
@@ -32,6 +32,11 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 			'requires' => 'ProcessWire>=3.0.83, AdminThemeUikit'
 		);
 	}
+
+	/**
+	 * ProcessPageListRenderJSON if needed for custom Page List labels
+	 */
+	protected $pplrj;
 
 	/**
 	 * Ready
@@ -46,6 +51,13 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 	 * @param HookEvent $event
 	 */
 	protected function modifyBreadcrumbs(HookEvent $event) {
+
+		// Get instance of ProcessPageListRenderJSON if needed
+		if($this->use_page_list_labels) {
+			$pages = $this->wire()->pages;
+			require_once $this->wire()->config->paths->modules . 'Process/ProcessPageList/ProcessPageListRenderJSON.php';
+			$this->pplrj = $this->wire(new ProcessPageListRenderJSON($pages->newPage(), $pages->newPageArray()));
+		}
 
 		// Activate dropdowns?
 		if(!$this->activateDropdowns()) return;
@@ -75,14 +87,12 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 			// Get corresponding parent page
 			$parent = $parents->get($key);
 			if(!$parent) continue;
-			$title = $breadcrumb->get('titleMarkup');
-			if(!$title) $title = $this->wire('sanitizer')->entities1($this->_($breadcrumb->title));
-			$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span><a href='{$admin_url}page/?open={$parent->id}'>$title</a>";
+			$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span><a href='{$admin_url}page/?open={$parent->id}'>{$this->getBreadcrumbLabel($parent)}</a>";
 			$out .= $this->getBreadcrumbDropdown($parent) . "</li>";
 		}
 
 		// Add edited page as extra breadcrumb item
-		$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span><a href='{$admin_url}page/?open={$page->id}'>$page->title</a>";
+		$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span><a href='{$admin_url}page/?open={$page->id}'>{$this->getBreadcrumbLabel($page)}</a>";
 		$out .= $this->getBreadcrumbDropdown($page) . "</li>";
 
 		// Add children as last dropdown
@@ -123,9 +133,9 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 				if($p->hasStatus('hidden')) $classes[] = 'page-hidden';
 				if(count($classes)) $class = " class='" . implode(' ', $classes) . "'";
 				if($p->editable) {
-					$out .= "<li$class><a class='page-item' href='$p->editUrl'><span class='page-title'>$p->title</span></a></li>";
+					$out .= "<li$class><a class='page-item' href='$p->editUrl'><span class='page-title'>{$this->getBreadcrumbLabel($p)}</span></a></li>";
 				} elseif($this->show_uneditable) {
-					$out .= "<li$class><span class='page-item uneditable'><span class='page-title'>$p->title</span></span></li>";
+					$out .= "<li$class><span class='page-item uneditable'><span class='page-title'>{$this->getBreadcrumbLabel($p)}</span></span></li>";
 				}
 			}
 		}
@@ -173,6 +183,20 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 	}
 
 	/**
+	 * Get breadcrumb label
+	 *
+	 * @param Page $page
+	 * @return int
+	 */
+	protected function getBreadcrumbLabel($page) {
+		if($this->use_page_list_labels) {
+			return $this->pplrj->getPageLabel($page, array('noTags' => true, 'noIcon' => true));
+		} else {
+			return $this->wire()->sanitizer->entities1($page->title);
+		}
+	}
+
+	/**
 	 * Add JS and CSS dependencies
 	 *
 	 * @param HookEvent $event
@@ -217,10 +241,19 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 	 */
 	public function getModuleConfigInputfields($inputfields) {
 		/* @var InputfieldCheckbox $f */
-		$f = $this->wire('modules')->InputfieldCheckbox;
+		$f = $this->wire()->modules->InputfieldCheckbox;
 		$f_name = 'show_uneditable';
 		$f->name = $f_name;
 		$f->label = $this->_('Include uneditable pages in dropdowns');
+		$f->checked = $this->$f_name === 1 ? 'checked' : '';
+		$inputfields->add($f);
+
+		/* @var InputfieldCheckbox $f */
+		$f = $this->wire()->modules->InputfieldCheckbox;
+		$f_name = 'use_page_list_labels';
+		$f->name = $f_name;
+		$f->label = $this->_('Use custom labels defined for Page List');
+		$f->notes = $this->_('If checked any custom template setting for "List of fields to display in the admin Page List" will be used for the breadcrumbs and dropdowns.');
 		$f->checked = $this->$f_name === 1 ? 'checked' : '';
 		$inputfields->add($f);
 	}

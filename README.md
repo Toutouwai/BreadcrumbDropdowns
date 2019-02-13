@@ -9,7 +9,11 @@ A module for ProcessWire CMS/CMF. Adds dropdown menus of page edit links to the 
 
 [Install](http://modules.processwire.com/install-uninstall/) the Breadcrumb Dropdowns module. The module requires ProcessWire >= v3.0.83 and AdminThemeUikit.
 
-There is a checkbox option in the module config that determines if the breadcrumb dropdowns will include pages that the user does not have permission to edit.
+
+## Configuration
+
+* There is an option that determines if the breadcrumb dropdowns will include pages that the user does not have permission to edit.
+* There is an option to use any custom template setting defined for "List of fields to display in the admin Page List" in the breadcrumbs and dropdowns.
 
 ## Features/details
 
