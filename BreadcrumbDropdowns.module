@@ -24,7 +24,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		return array(
 			'title' => 'Breadcrumb Dropdowns',
 			'summary' => 'Adds dropdown menus of page edit links to the breadcrumbs in Page Edit.',
-			'version' => '0.1.17',
+			'version' => '0.1.18',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',
@@ -193,7 +193,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 			// Call ProcessPageListRender::getPageLabel without triggering hooks
 			return $this->pplrj->___getPageLabel($page, array('noTags' => true, 'noIcon' => true));
 		} else {
-			return $this->wire()->sanitizer->entities1($page->title);
+			return $this->wire()->sanitizer->entities1($page->get('title|name'));
 		}
 	}
 
