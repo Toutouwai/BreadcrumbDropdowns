@@ -24,7 +24,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		return array(
 			'title' => 'Breadcrumb Dropdowns',
 			'summary' => 'Adds dropdown menus of page edit links to the breadcrumbs in Page Edit.',
-			'version' => '0.1.18',
+			'version' => '0.1.19',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',
@@ -42,8 +42,8 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 	 * Ready
 	 */
 	public function ready() {
-		$this->addHookBefore('ProcessPageEdit::buildForm', $this, 'addDependencies');
 		$this->addHookBefore('AdminThemeUikit::renderBreadcrumbs', $this, 'modifyBreadcrumbs');
+		$this->addHookBefore('ProcessPageEdit::buildForm', $this, 'addDependencies');
 	}
 
 	/**
@@ -52,15 +52,15 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 	 */
 	protected function modifyBreadcrumbs(HookEvent $event) {
 
+		// Activate dropdowns?
+		if(!$this->activateDropdowns()) return;
+
 		// Get instance of ProcessPageListRenderJSON if needed
 		if($this->use_page_list_labels) {
-			$pages = $this->wire()->pages;
+			$pages = $this->wire('pages');
 			require_once $this->wire()->config->paths->modules . 'Process/ProcessPageList/ProcessPageListRenderJSON.php';
 			$this->pplrj = $this->wire(new ProcessPageListRenderJSON($pages->newPage(), $pages->newPageArray()));
 		}
-
-		// Activate dropdowns?
-		if(!$this->activateDropdowns()) return;
 
 		$event->replace = true;
 		/* @var AdminThemeUikit $atu */
@@ -68,9 +68,11 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 
 		// Get edited page
 		/* @var Page $page */
-		$page = $this->wire()->process->getPage();
+		$page = $this->wire('process')->getPage();
 		// Get parents of edited page
 		$parents = $page->parents;
+		// Discard the Home page if this is ProcessUser
+		if($this->wire('process') == 'ProcessUser') $parents->shift();
 
 		// Modified code from AdminThemeUikit::renderBreadcrumbs
 		if(!$this->wire('user')->isLoggedIn() || $this->wire('input')->get('modal')) {
@@ -82,7 +84,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		if(strpos($this->layout, 'sidenav') === false) {
 			$out .= "<li>" . $atu->renderQuickTreeLink() . "</li>";
 		}
-		$admin_url = $this->wire()->config->urls->admin;
+		$admin_url = $this->wire('config')->urls->admin;
 		foreach($breadcrumbs as $key => $breadcrumb) {
 			// Get corresponding parent page
 			$parent = $parents->get($key);
@@ -115,6 +117,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 	 * @throws WireException
 	 */
 	protected function getBreadcrumbDropdown($page, $is_parent = false) {
+
 		// Determine $parent and $sibling
 		if($is_parent) {
 			$parent = $page;
@@ -123,6 +126,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 			$parent = $page->parent;
 			$sibling = $page;
 		}
+		$is_user_parent = in_array($parent->id, $this->wire('config')->usersPageIDs);
 		$out = '';
 		if($sibling->id) {
 			foreach($this->getSiblings($sibling) as $p) {
@@ -134,15 +138,23 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 				if(count($classes)) $class = " class='" . implode(' ', $classes) . "'";
 				if($p->editable) {
 					$out .= "<li$class><a class='page-item' href='$p->editUrl'><span class='page-title'>{$this->getBreadcrumbLabel($p)}</span></a></li>";
-				} elseif($this->show_uneditable) {
+				} elseif($this->show_uneditable && !$is_user_parent) {
 					$out .= "<li$class><span class='page-item uneditable'><span class='page-title'>{$this->getBreadcrumbLabel($p)}</span></span></li>";
 				}
 			}
 		}
-		if($parent->id && $parent->addable) {
-			$add_new_url = $this->wire()->config->urls->admin . 'page/add/?parent_id=' . $parent->id;
-			$out .= "<li class='add-new'><a class='page-item' href='$add_new_url'><i class='fa fa-fw fa-plus-circle'></i> Add New</a></li>";
+
+		// "Add new" item - not for Admin parents apart from Users
+		if($parent->id && $parent->addable && ($parent->template->id !== 2 || $parent->id === 29)) {
+			$admin_url = $this->wire('config')->urls->admin;
+			if($is_user_parent) {
+				$add_new_url = "{$admin_url}access/users/add/?parent_id={$parent->id}";
+			} else {
+				$add_new_url = "{$admin_url}page/add/?parent_id={$parent->id}";
+			}
+			$out .= "<li class='add-new'><a class='page-item' href='$add_new_url'><i class='fa fa-fw fa-plus-circle'></i>" . $this->_('Add New') . "</a></li>";
 		}
+
 		// Add a note if no dropdown markup
 		if(!$out) $out .= "<li><span class='page-item uneditable'><span class='page-title'>" . $this->_('No editable pages') ."</span></span></li>";
 		if($out) $out = "<ul class='breadcrumb-dropdown'>$out</ul>";
@@ -178,7 +190,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 	 * @return int
 	 */
 	public function getPageIndex($page) {
-		$sibling_ids = array_flip($this->wire()->pages->findIDs("parent=$page->parent, include=all"));
+		$sibling_ids = array_flip($this->wire('pages')->findIDs("parent=$page->parent, include=all"));
 		return (int) $sibling_ids[$page->id];
 	}
 
@@ -193,7 +205,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 			// Call ProcessPageListRender::getPageLabel without triggering hooks
 			return $this->pplrj->___getPageLabel($page, array('noTags' => true, 'noIcon' => true));
 		} else {
-			return $this->wire()->sanitizer->entities1($page->get('title|name'));
+			return $this->wire('sanitizer')->entities1($page->get('title|name'));
 		}
 	}
 
@@ -208,7 +220,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		if(!$this->activateDropdowns()) return;
 
 		// Add JS and CSS
-		$config = $this->wire()->config;
+		$config = $this->wire('config');
 		$info = $this->getModuleInfo();
 		$version = $info['version'];
 		$config->scripts->add($config->urls->{$this} . "{$this}.js?v={$version}");
@@ -222,15 +234,21 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 	 * @return boolean
 	 */
 	protected function activateDropdowns() {
-		$process = $this->wire()->process;
-		// No if not ProcessPageEdit
-		if($process != 'ProcessPageEdit') return false;
-		// No if not the main execute method
-		if($this->wire()->input->urlSegment1) return false;
-		/* @var ProcessPageEdit $process */
+		/* @var ProcessPageEdit|ProcessUser $process */
+		$process = $this->wire('process');
+		// No if not ProcessPageEdit or ProcessUser
+		if($process != 'ProcessPageEdit' && $process != 'ProcessUser') return false;
+		$segment = $this->wire('input')->urlSegment1;
+		if($process == 'ProcessPageEdit') {
+			// No if not ProcessPageEdit execute()
+			if($segment) return false;
+		} elseif($process == 'ProcessUser') {
+			// No if not ProcessUser executeEdit()
+			if($segment !== 'edit') return false;
+		}
 		$page = $process->getPage();
 		// No if cannot get $page (e.g. no edit access)
-		if(!$page) return false;
+		if(!$page || !$page->id) return false;
 		// Otherwise, yes
 		return true;
 	}
@@ -241,8 +259,11 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 	 * @param InputfieldWrapper $inputfields
 	 */
 	public function getModuleConfigInputfields($inputfields) {
+
+		$modules = $this->wire('modules');
+
 		/* @var InputfieldCheckbox $f */
-		$f = $this->wire()->modules->InputfieldCheckbox;
+		$f = $modules->InputfieldCheckbox;
 		$f_name = 'show_uneditable';
 		$f->name = $f_name;
 		$f->label = $this->_('Include uneditable pages in dropdowns');
@@ -250,13 +271,14 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		$inputfields->add($f);
 
 		/* @var InputfieldCheckbox $f */
-		$f = $this->wire()->modules->InputfieldCheckbox;
+		$f = $modules->InputfieldCheckbox;
 		$f_name = 'use_page_list_labels';
 		$f->name = $f_name;
 		$f->label = $this->_('Use custom labels defined for Page List');
 		$f->notes = $this->_('If checked any custom template setting for "List of fields to display in the admin Page List" will be used for the breadcrumbs and dropdowns.');
 		$f->checked = $this->$f_name === 1 ? 'checked' : '';
 		$inputfields->add($f);
+
 	}
 
 }
