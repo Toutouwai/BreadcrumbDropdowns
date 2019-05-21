@@ -14,6 +14,7 @@ A module for ProcessWire CMS/CMF. Adds dropdown menus of page edit links to the 
 
 * There is an option that determines if the breadcrumb dropdowns will include pages that the user does not have permission to edit.
 * There is an option to use any custom template setting defined for "List of fields to display in the admin Page List" in the breadcrumbs and dropdowns.
+* There is an option to set your custom hooks in a case you use a custom admin theme.
 
 ## Features/details
 
