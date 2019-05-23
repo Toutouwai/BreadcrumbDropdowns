@@ -24,7 +24,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		return array(
 			'title' => 'Breadcrumb Dropdowns',
 			'summary' => 'Adds dropdown menus of page edit links to the breadcrumbs in Page Edit.',
-			'version' => '0.1.19',
+			'version' => '0.1.20',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',
@@ -44,6 +44,12 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 	public function ready() {
 		$this->addHookBefore('AdminThemeUikit::renderBreadcrumbs', $this, 'modifyBreadcrumbs');
 		$this->addHookBefore('ProcessPageEdit::buildForm', $this, 'addDependencies');
+		if($this->custom_hooks) {
+			$lines = preg_split('/\n|\r/', $this->custom_hooks);
+            foreach($lines as $method) {
+                $this->addHookBefore($method, $this, 'modifyBreadcrumbs');
+            }
+		}
 	}
 
 	/**
@@ -279,6 +285,17 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		$f->checked = $this->$f_name === 1 ? 'checked' : '';
 		$inputfields->add($f);
 
+		/* @var InputfieldTextarea $f */
+		$f = $modules->InputfieldTextarea;
+		$f_name = 'custom_hooks';
+		$f->name = $f_name;
+		$f->label = $this->_('Custom hooks');
+		$f->description = $this->_('Define custom hooks if you are using a custom Admin Theme. One hook per line.');
+		$f->value = $this->$f_name;
+		$f->notes = $this->_('Example: MyAdminTheme::renderBreadcrumbs');
+		$f->rows = 3;
+		$f->collapsed = Inputfield::collapsedBlank;
+		$inputfields->add($f);
 	}
 
 }
