@@ -290,9 +290,11 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		$f_name = 'custom_hooks';
 		$f->name = $f_name;
 		$f->label = $this->_('Custom hooks');
-		$f->description = $this->_('Define your custom hooks in a case you use a custom Admin Theme. One hook per line.');
+		$f->description = $this->_('Define custom hooks if you are using a custom Admin Theme. One hook per line.');
 		$f->value = $this->$f_name;
 		$f->notes = $this->_('Example: MyAdminTheme::renderBreadcrumbs');
+		$f->rows = 3;
+		$f->collapsed = Inputfield::collapsedBlank;
 		$inputfields->add($f);
 	}
 
