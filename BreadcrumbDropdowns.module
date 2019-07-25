@@ -24,7 +24,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		return array(
 			'title' => 'Breadcrumb Dropdowns',
 			'summary' => 'Adds dropdown menus of page edit links to the breadcrumbs in Page Edit.',
-			'version' => '0.1.20',
+			'version' => '0.1.21',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',
@@ -77,8 +77,6 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		$page = $this->wire('process')->getPage();
 		// Get parents of edited page
 		$parents = $page->parents;
-		// Discard the Home page if this is ProcessUser
-		if($this->wire('process') == 'ProcessUser') $parents->shift();
 
 		// Modified code from AdminThemeUikit::renderBreadcrumbs
 		if(!$this->wire('user')->isLoggedIn() || $this->wire('input')->get('modal')) {
@@ -91,12 +89,21 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 			$out .= "<li>" . $atu->renderQuickTreeLink() . "</li>";
 		}
 		$admin_url = $this->wire('config')->urls->admin;
+		$is_process_user = $this->wire('process') == 'ProcessUser';
 		foreach($breadcrumbs as $key => $breadcrumb) {
-			// Get corresponding parent page
-			$parent = $parents->get($key);
-			if(!$parent) continue;
-			$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span><a href='{$admin_url}page/?open={$parent->id}'>{$this->getBreadcrumbLabel($parent)}</a>";
-			$out .= $this->getBreadcrumbDropdown($parent) . "</li>";
+			if($is_process_user) {
+				// ProcessUser: use standard AdminThemeUikit breadcrumbs
+				$title = $breadcrumb->get('titleMarkup');
+				if(!$title) $title = $this->wire('sanitizer')->entities1($this->_($breadcrumb->title));
+				$out .= "<li><span class='dropdown-toggle no-dropdown'><i class='fa fa-fw fa-angle-right'></i></span><a href='$breadcrumb->url'>$title</a></li>";
+			} else {
+				// ProcessPageEdit: breadcrumb dropdowns
+				// Get corresponding parent page
+				$parent = $parents->get($key);
+				if(!$parent) continue;
+				$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span><a href='{$admin_url}page/?open={$parent->id}'>{$this->getBreadcrumbLabel($parent)}</a>";
+				$out .= $this->getBreadcrumbDropdown($parent) . "</li>";
+			}
 		}
 
 		// Add edited page as extra breadcrumb item
