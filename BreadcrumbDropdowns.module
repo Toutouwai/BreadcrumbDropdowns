@@ -130,6 +130,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 	 * @throws WireException
 	 */
 	protected function getBreadcrumbDropdown($page, $is_parent = false) {
+		$config = $this->wire('config');
 
 		// Determine $parent and $sibling
 		if($is_parent) {
@@ -150,16 +151,16 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 				if(count($classes)) $class = " class='" . implode(' ', $classes) . "'";
 				if($p->editable) {
 					$out .= "<li$class><a class='page-item' href='$p->editUrl'><span class='page-title'>{$this->getBreadcrumbLabel($p)}</span></a></li>";
-				} elseif($this->show_uneditable && !in_array($p->template->id, $this->wire('config')->userTemplateIDs)) {
+				} elseif($this->show_uneditable && !in_array($p->template->id, $config->userTemplateIDs)) {
 					$out .= "<li$class><span class='page-item uneditable'><span class='page-title'>{$this->getBreadcrumbLabel($p)}</span></span></li>";
 				}
 			}
 		}
 
 		// "Add new" item - not for Admin parents apart from Users
-		if($parent->id && $parent->addable && ($parent->template->id !== 2 || $parent->id === 29)) {
-			$admin_url = $this->wire('config')->urls->admin;
-			if($parent->id === 29) {
+		if($parent->id && $parent->addable && ($parent->template->id !== 2 || $parent->id === $config->usersPageID)) {
+			$admin_url = $config->urls->admin;
+			if($parent->id === $config->usersPageID) {
 				$add_new_url = "{$admin_url}access/users/add/?parent_id={$parent->id}";
 			} else {
 				$add_new_url = "{$admin_url}page/add/?parent_id={$parent->id}";
