@@ -24,7 +24,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		return array(
 			'title' => 'Breadcrumb Dropdowns',
 			'summary' => 'Adds dropdown menus of page edit links to the breadcrumbs in Page Edit.',
-			'version' => '0.1.21',
+			'version' => '0.1.22',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',
@@ -46,9 +46,9 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		$this->addHookBefore('ProcessPageEdit::buildForm', $this, 'addDependencies');
 		if($this->custom_hooks) {
 			$lines = preg_split('/\n|\r/', $this->custom_hooks);
-            foreach($lines as $method) {
-                $this->addHookBefore($method, $this, 'modifyBreadcrumbs');
-            }
+			foreach($lines as $method) {
+				$this->addHookBefore($method, $this, 'modifyBreadcrumbs');
+			}
 		}
 	}
 
@@ -139,7 +139,6 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 			$parent = $page->parent;
 			$sibling = $page;
 		}
-		$is_user_parent = in_array($parent->id, $this->wire('config')->usersPageIDs);
 		$out = '';
 		if($sibling->id) {
 			foreach($this->getSiblings($sibling) as $p) {
@@ -151,7 +150,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 				if(count($classes)) $class = " class='" . implode(' ', $classes) . "'";
 				if($p->editable) {
 					$out .= "<li$class><a class='page-item' href='$p->editUrl'><span class='page-title'>{$this->getBreadcrumbLabel($p)}</span></a></li>";
-				} elseif($this->show_uneditable && !$is_user_parent) {
+				} elseif($this->show_uneditable && !in_array($p->template->id, $this->wire('config')->userTemplateIDs)) {
 					$out .= "<li$class><span class='page-item uneditable'><span class='page-title'>{$this->getBreadcrumbLabel($p)}</span></span></li>";
 				}
 			}
@@ -160,7 +159,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		// "Add new" item - not for Admin parents apart from Users
 		if($parent->id && $parent->addable && ($parent->template->id !== 2 || $parent->id === 29)) {
 			$admin_url = $this->wire('config')->urls->admin;
-			if($is_user_parent) {
+			if($parent->id === 29) {
 				$add_new_url = "{$admin_url}access/users/add/?parent_id={$parent->id}";
 			} else {
 				$add_new_url = "{$admin_url}page/add/?parent_id={$parent->id}";
