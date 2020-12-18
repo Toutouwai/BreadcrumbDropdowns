@@ -1,8 +1,8 @@
 # Breadcrumb Dropdowns
 
-A module for ProcessWire CMS/CMF. Adds dropdown menus of page edit links to the breadcrumbs in Page Edit.
+A module for ProcessWire CMS/CMF. Adds dropdown menus of page edit links to the breadcrumbs in Page Edit. The module also adds dropdowns in ProcessTemplate and ProcessField that allow you to quickly jump from editing one template/field to another.
 
-![bd](https://user-images.githubusercontent.com/1538852/45392594-39663680-b67c-11e8-8f2a-8f9d0c3c0608.gif)
+![Breadcrumb Dropdowns](https://user-images.githubusercontent.com/1538852/45392594-39663680-b67c-11e8-8f2a-8f9d0c3c0608.gif)
 
 
 ## Installation
@@ -14,6 +14,7 @@ A module for ProcessWire CMS/CMF. Adds dropdown menus of page edit links to the 
 
 * There is an option that determines if the breadcrumb dropdowns will include pages that the user does not have permission to edit.
 * There is an option to use any custom template setting defined for "List of fields to display in the admin Page List" in the breadcrumbs and dropdowns.
+* You can disable dropdowns in ProcessTemplate and/or ProcessField if needed. There are also options to exclude system templates/fields from the dropdowns.
 * There is an option to set custom hooks if you are using a custom admin theme.
 
 ## Features/details

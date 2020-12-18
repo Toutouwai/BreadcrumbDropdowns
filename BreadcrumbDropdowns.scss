@@ -1,0 +1,34 @@
+.uk-breadcrumb {
+	.pw-panel { margin-right:-8px; } // The uneven space after the tree icon bugs me
+	li { font-size:0.875rem; position:relative; }
+	> li {
+		&::before { content:none !important; }
+	}
+	.dropdown-toggle { display:inline-block; color:#d2d4d9; width:21px; height:21px; margin:0 6px; position:relative; bottom:-1px;
+		i { position:relative; left:2px; bottom:1px; }
+		&:not(.no-dropdown):hover { background-color:#f0f3f7; color:#354b60; cursor:pointer; }
+	}
+	.breadcrumb-dropdown { list-style:none; background-color:#fff; position:absolute; left:6px; top:28px; z-index:199; padding:0; box-shadow:0 1px 7px rgba(0,0,0,.175); border:1px solid #d9e1ea; border-bottom:none; display:none;
+		&.visible { display:block; }
+		li {
+			&.item-current {
+				.inner-item { color:#e83561; }
+			}
+			&.item-hidden {
+				.item-title { opacity:0.6; }
+			}
+			&.item-unpublished { text-decoration:line-through; }
+			&.add-new {
+				a { background-color:#e7f6f2;
+					&:hover { background-color:#d6f2ea; }
+				}
+				i { color:#3eb998; margin-left:-3px; }
+			}
+			.inner-item { color:#354b60; display:block; white-space:nowrap; padding:2px 10px 3px; border-bottom:1px solid #d9e1ea; }
+			.uneditable {
+				.item-title { cursor:not-allowed; font-style:italic; opacity:0.6; }
+			}
+			a:hover { text-decoration:none; background-color:#f0f3f7; }
+		}
+	}
+}
