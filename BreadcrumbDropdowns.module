@@ -9,7 +9,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		return array(
 			'title' => 'Breadcrumb Dropdowns',
 			'summary' => 'Adds dropdown menus to the breadcrumbs in ProcessPageEdit, ProcessTemplate and ProcessField.',
-			'version' => '0.2.0',
+			'version' => '0.3.0',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',
@@ -24,9 +24,26 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 	protected $pplrj;
 
 	/**
+	 * "Add New" URLs for supported Processes
+	 */
+	protected $add_urls = [
+		'ProcessTemplate' => 'setup/template/add/',
+		'ProcessField' => 'setup/field/add/',
+		'ProcessLanguage' => 'setup/languages/add/',
+		'ProcessRole' => 'access/roles/add/',
+		'ProcessPermission' => 'access/permissions/add/',
+	];
+
+	/**
+	 * Label for "Add New" links
+	 */
+	protected $add_label;
+
+	/**
 	 * Ready
 	 */
 	public function ready() {
+		$this->add_label = $this->_('Add New');
 		$this->addHookAfter('ProcessController::execute', $this, 'afterProcessController');
 	}
 
@@ -47,11 +64,34 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		// Hook breadcrumbs render
 		$this->addHookBefore('AdminThemeUikit::renderBreadcrumbs', $this, 'modifyBreadcrumbs');
 		if($this->custom_hooks) {
-			$lines = preg_split('/\n|\r/', $this->custom_hooks);
+			$lines = explode("\n", str_replace("\r", "", $this->custom_hooks));
 			foreach($lines as $method) {
 				$this->addHookBefore($method, $this, 'modifyBreadcrumbs');
 			}
 		}
+	}
+
+	/**
+	 * Is the supplied Process supported by this module?
+	 *
+	 * @param Process $process
+	 * @return boolean
+	 */
+	protected function isSupportedProcess(Process $process) {
+		$process = (string) $process;
+		$segment = $this->wire()->input->urlSegment1;
+		// Supported Processes as Process name => valid URL segments
+		$supported_processes = [
+			'ProcessPageEdit' => [''],
+			'ProcessUser' => ['edit'],
+			'ProcessTemplate' => ['edit'],
+			'ProcessField' => ['edit'],
+			'ProcessLanguage' => ['edit'],
+			'ProcessRole' => ['edit'],
+			'ProcessPermission' => ['edit'],
+			'ProcessLogger' => ['view'],
+		];
+		return isset($supported_processes[$process]) && in_array($segment, $supported_processes[$process]);
 	}
 
 	/**
@@ -61,36 +101,12 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 	 */
 	protected function activateDropdowns() {
 		$process = $this->wire()->process;
-		$segment = $this->wire()->input->urlSegment1;
-
-		// ProcessTemplate
-		if($process == 'ProcessTemplate' && $segment === 'edit' && !$this->disable_for_templates) {
-			return true;
-		}
-
-		// ProcessField
-		if($process == 'ProcessField' && $segment === 'edit' && !$this->disable_for_fields) {
-			return true;
-		}
-
-		// ProcessPageEdit or ProcessUser
 		if($process == 'ProcessPageEdit' || $process == 'ProcessUser') {
-			if($process == 'ProcessPageEdit' && $segment) {
-				// No if not ProcessPageEdit execute()
-				return false;
-			} elseif($process == 'ProcessUser' && $segment !== 'edit') {
-				// No if not ProcessUser executeEdit()
-				return false;
-			}
 			$page = $process->getPage();
 			// No if cannot get $page (e.g. no edit access)
 			if(!$page || !$page->id) return false;
-			// Otherwise, yes
-			return true;
 		}
-
-		// All other scenarios
-		return false;
+		return $this->isSupportedProcess($process);
 	}
 
 	/**
@@ -101,6 +117,8 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 	protected function modifyBreadcrumbs(HookEvent $event) {
 		/** @var AdminThemeUikit $atu */
 		$atu = $event->object;
+		// In case of custom theme that doesn't extend AdminThemeUikit
+		if(!$atu instanceof AdminThemeUikit) $atu = $this->wire()->modules->get('AdminThemeUikit');
 		$event->replace = true;
 
 		// From AdminThemeUikit::renderBreadcrumbs
@@ -122,8 +140,73 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 			case 'ProcessField':
 				$out = $this->fieldBreadcrumbs($atu);
 				break;
+			case 'ProcessLanguage':
+			case 'ProcessRole':
+			case 'ProcessPermission':
+			case 'ProcessLogger':
+				$out = $this->genericBreadcrumbs($atu);
+				break;
 		}
 		$event->return = $out;
+	}
+
+	/**
+	 * Render AdminThemeUikit breadcrumbs (slightly modified)
+	 *
+	 * @param AdminThemeUikit $atu
+	 * @return string
+	 */
+	protected function atuBreadcrumbs(AdminThemeUikit $atu) {
+		$out = '';
+		if(strpos($this->layout, 'sidenav') === false) {
+			$out .= "<li>" . $atu->renderQuickTreeLink() . "</li>";
+		}
+		foreach($this->wire()->breadcrumbs as $breadcrumb) {
+			$title = $breadcrumb->get('titleMarkup');
+			if(!$title) $title = $this->wire()->sanitizer->entities1($this->_($breadcrumb->title));
+			$out .= "<li><span class='dropdown-toggle no-dropdown'><i class='fa fa-fw fa-angle-right'></i></span><a href='$breadcrumb->url'>$title</a></li>";
+		}
+		return "<ul class='uk-breadcrumb'>$out</ul>";
+	}
+
+	/**
+	 * Render generic Process breadcrumbs from nav JSON
+	 *
+	 * @param AdminThemeUikit $atu
+	 * @return string
+	 */
+	protected function genericBreadcrumbs(AdminThemeUikit $atu) {
+		$out = $this->atuBreadcrumbs($atu);
+		$process = (string) $this->wire()->process;
+		$input_url = $this->wire()->input->url(true);
+		$page_url = $this->wire()->page->url;
+		$dropdown = '';
+		$current = '';
+		// Dropdown items
+		$json = $this->wire()->process->___executeNavJSON();
+		if($json) {
+			$data = wireDecodeJSON($json);
+			if(!empty($data['list'])) {
+				foreach($data['list'] as $item) {
+					// Remove any secondary info in <small> tags from the label (itemLabel2)
+					$label = preg_replace( '/( <small>.*?<\/small>)/i', '', $item['label']);
+					$class = '';
+					if($page_url . $item['url'] === $input_url) {
+						$current = $label;
+						$class = ' class="item-current"';
+					}
+					$dropdown .= "<li$class><a class='inner-item' href='{$page_url}{$item['url']}'><span class='item-title'>{$label}</span></a></li>";
+				}
+			}
+		}
+		// Add New
+		if(!empty($this->add_urls[$process])) {
+			$add_new_url = $this->wire()->config->urls->admin . $this->add_urls[$process];
+			$dropdown .= "<li class='add-new'><a class='inner-item' href='{$add_new_url}'><i class='fa fa-fw fa-plus-circle'></i>{$this->add_label}</a></li>";
+		}
+		// Breadcrumb for current page
+		if($dropdown) $out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span>{$current}<ul class='breadcrumb-dropdown'>$dropdown</ul></li>";
+		return "<ul class='uk-breadcrumb'>$out</ul>";
 	}
 
 	/**
@@ -134,18 +217,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 	 */
 	protected function templateBreadcrumbs(AdminThemeUikit $atu) {
 		$templates = $this->wire()->templates;
-		$breadcrumbs = $this->wire()->breadcrumbs;
-		$out = '';
-		if(strpos($this->layout, 'sidenav') === false) {
-			$out .= "<li>" . $atu->renderQuickTreeLink() . "</li>";
-		}
-
-		// Standard breadcrumbs
-		foreach($breadcrumbs as $breadcrumb) {
-			$title = $breadcrumb->get('titleMarkup');
-			if(!$title) $title = $this->wire()->sanitizer->entities1($this->_($breadcrumb->title));
-			$out .= "<li><span class='dropdown-toggle no-dropdown'><i class='fa fa-fw fa-angle-right'></i></span><a href='$breadcrumb->url'>$title</a></li>";
-		}
+		$out = $this->atuBreadcrumbs($atu);
 
 		// Add edited template as extra breadcrumb item, with dropdown for all templates
 		$url = $this->wire()->input->url;
@@ -160,13 +232,12 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 				$out .= "<li$class><a class='inner-item' href='{$url}?id={$id}'><span class='item-title'>{$template->name}</span></a></li>";
 			}
 			// Add New
-			$add_new_url = $this->wire()->config->urls->admin . 'setup/template/add/';
-			$out .= "<li class='add-new'><a class='inner-item' href='{$add_new_url}'><i class='fa fa-fw fa-plus-circle'></i>" . $this->_('Add New') . "</a></li>";
+			$add_new_url = $this->wire()->config->urls->admin . $this->add_urls['ProcessTemplate'];
+			$out .= "<li class='add-new'><a class='inner-item' href='{$add_new_url}'><i class='fa fa-fw fa-plus-circle'></i>{$this->add_label}</a></li>";
 			$out .= "</ul></li>";
 		}
 
-		if($out) $out = "<ul class='uk-breadcrumb'>$out</ul>";
-		return $out;
+		return "<ul class='uk-breadcrumb'>$out</ul>";
 	}
 
 	/**
@@ -177,18 +248,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 	 */
 	protected function fieldBreadcrumbs(AdminThemeUikit $atu) {
 		$fields = $this->wire()->fields;
-		$breadcrumbs = $this->wire()->breadcrumbs;
-		$out = '';
-		if(strpos($this->layout, 'sidenav') === false) {
-			$out .= "<li>" . $atu->renderQuickTreeLink() . "</li>";
-		}
-
-		// Standard breadcrumbs
-		foreach($breadcrumbs as $breadcrumb) {
-			$title = $breadcrumb->get('titleMarkup');
-			if(!$title) $title = $this->wire()->sanitizer->entities1($this->_($breadcrumb->title));
-			$out .= "<li><span class='dropdown-toggle no-dropdown'><i class='fa fa-fw fa-angle-right'></i></span><a href='$breadcrumb->url'>$title</a></li>";
-		}
+		$out = $this->atuBreadcrumbs($atu);
 
 		// Add edited field as extra breadcrumb item, with dropdown for all fields
 		$url = $this->wire()->input->url;
@@ -203,13 +263,12 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 				$out .= "<li$class><a class='inner-item' href='{$url}?id={$id}'><span class='item-title'>{$field->name}</span></a></li>";
 			}
 			// Add New
-			$add_new_url = $this->wire()->config->urls->admin . 'setup/field/add/';
-			$out .= "<li class='add-new'><a class='inner-item' href='{$add_new_url}'><i class='fa fa-fw fa-plus-circle'></i>" . $this->_('Add New') . "</a></li>";
+			$add_new_url = $this->wire()->config->urls->admin . $this->add_urls['ProcessField'];;
+			$out .= "<li class='add-new'><a class='inner-item' href='{$add_new_url}'><i class='fa fa-fw fa-plus-circle'></i>{$this->add_label}</a></li>";
 			$out .= "</ul></li>";
 		}
 
-		if($out) $out = "<ul class='uk-breadcrumb'>$out</ul>";
-		return $out;
+		return "<ul class='uk-breadcrumb'>$out</ul>";
 	}
 
 	/**
@@ -266,8 +325,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 			$out .= $this->getBreadcrumbDropdown($page, true) . "</li>";
 		}
 
-		$out = "<ul class='uk-breadcrumb'>$out</ul>";
-		return $out;
+		return "<ul class='uk-breadcrumb'>$out</ul>";
 	}
 
 	/**
@@ -314,7 +372,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 			} else {
 				$add_new_url = "{$admin_url}page/add/?parent_id={$parent->id}";
 			}
-			$out .= "<li class='add-new'><a class='inner-item' href='$add_new_url'><i class='fa fa-fw fa-plus-circle'></i>" . $this->_('Add New') . "</a></li>";
+			$out .= "<li class='add-new'><a class='inner-item' href='$add_new_url'><i class='fa fa-fw fa-plus-circle'></i>{$this->add_label}</a></li>";
 		}
 
 		// Add a note if no dropdown markup

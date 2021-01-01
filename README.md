@@ -1,6 +1,8 @@
 # Breadcrumb Dropdowns
 
-A module for ProcessWire CMS/CMF. Adds dropdown menus of page edit links to the breadcrumbs in Page Edit. The module also adds dropdowns in ProcessTemplate and ProcessField that allow you to quickly jump from editing one template/field to another.
+A module for ProcessWire CMS/CMF. Adds dropdown menus of page edit links to the breadcrumbs in Page Edit. 
+
+The module also adds dropdowns in Edit Template, Edit Field, Edit User, Edit Role, Edit Permission, Edit Language, and when viewing a log file at Setup > Logs.
 
 ![Breadcrumb Dropdowns](https://user-images.githubusercontent.com/1538852/45392594-39663680-b67c-11e8-8f2a-8f9d0c3c0608.gif)
 
@@ -29,7 +31,7 @@ A module for ProcessWire CMS/CMF. Adds dropdown menus of page edit links to the 
 
 ## Overriding the listed siblings for a page
 
-If you want to override the siblings that are listed in the dropdowns you can hook the `BreadcrumbDropdowns::getSiblings` method and change the returned PageArray. For most use cases this won't be necessary.
+If you want to override the siblings that are listed in the Page Edit dropdowns you can hook the `BreadcrumbDropdowns::getSiblings` method and change the returned PageArray. For most use cases this won't be necessary.
 
 ## Incompatibilities
 
