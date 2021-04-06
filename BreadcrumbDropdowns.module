@@ -9,7 +9,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		return array(
 			'title' => 'Breadcrumb Dropdowns',
 			'summary' => 'Adds dropdown menus to the breadcrumbs in ProcessPageEdit, ProcessTemplate and ProcessField.',
-			'version' => '0.3.0',
+			'version' => '0.3.1',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',
@@ -151,7 +151,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 	}
 
 	/**
-	 * Render AdminThemeUikit breadcrumbs (slightly modified)
+	 * Render AdminThemeUikit breadcrumbs
 	 *
 	 * @param AdminThemeUikit $atu
 	 * @return string
@@ -162,11 +162,21 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 			$out .= "<li>" . $atu->renderQuickTreeLink() . "</li>";
 		}
 		foreach($this->wire()->breadcrumbs as $breadcrumb) {
-			$title = $breadcrumb->get('titleMarkup');
-			if(!$title) $title = $this->wire()->sanitizer->entities1($this->_($breadcrumb->title));
-			$out .= "<li><span class='dropdown-toggle no-dropdown'><i class='fa fa-fw fa-angle-right'></i></span><a href='$breadcrumb->url'>$title</a></li>";
+			$out .= $this->atuBreadcrumb($breadcrumb);
 		}
 		return "<ul class='uk-breadcrumb'>$out</ul>";
+	}
+
+	/**
+	 * Render individual AdminThemeUikit breadcrumb (slightly modified for styling consistency)
+	 *
+	 * @param Breadcrumb $breadcrumb
+	 * @return string
+	 */
+	protected function atuBreadcrumb(Breadcrumb $breadcrumb) {
+		$title = $breadcrumb->get('titleMarkup');
+		if(!$title) $title = $this->wire()->sanitizer->entities1($this->_($breadcrumb->title));
+		return "<li><span class='dropdown-toggle no-dropdown'><i class='fa fa-fw fa-angle-right'></i></span><a href='$breadcrumb->url'>$title</a></li>";
 	}
 
 	/**
@@ -299,7 +309,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		$admin_url = $this->wire()->config->urls->admin;
 		$is_process_user = $this->wire()->process == 'ProcessUser';
 		$breadcrumbs = $this->wire()->breadcrumbs;
-		foreach($breadcrumbs as $key => $breadcrumb) {
+		foreach($breadcrumbs as $breadcrumb) {
 			if($is_process_user) {
 				// ProcessUser: use standard AdminThemeUikit breadcrumbs
 				$title = $breadcrumb->get('titleMarkup');
@@ -307,11 +317,24 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 				$out .= "<li><span class='dropdown-toggle no-dropdown'><i class='fa fa-fw fa-angle-right'></i></span><a href='$breadcrumb->url'>$title</a></li>";
 			} else {
 				// ProcessPageEdit: breadcrumb dropdowns
-				// Get corresponding parent page
-				$parent = $parents->get($key);
-				if(!$parent) continue;
-				$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span><a href='{$admin_url}page/?open={$parent->id}'>{$this->getBreadcrumbLabel($parent)}</a>";
-				$out .= $this->getBreadcrumbDropdown($parent) . "</li>";
+				$modify_breadcrumb = false;
+				$parts = parse_url($breadcrumb->url);
+				if(!empty($parts['query'])) {
+					parse_str($parts['query'], $query);
+					if(!empty($query['open'])) {
+						$parent_id = (int) $query['open'];
+						$parent = $parents->get("id=$parent_id");
+						if($parent->id) $modify_breadcrumb = true;
+					}
+				}
+				if($modify_breadcrumb) {
+					// Breadcrumb with dropdown
+					$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span><a href='{$admin_url}page/?open={$parent->id}'>{$this->getBreadcrumbLabel($parent)}</a>";
+					$out .= $this->getBreadcrumbDropdown($parent) . "</li>";
+				} else {
+					// Unsupported breadcrumb, use AdminThemeUikit default
+					$out .= $this->atuBreadcrumb($breadcrumb);
+				}
 			}
 		}
 
