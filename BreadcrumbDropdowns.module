@@ -9,7 +9,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		return array(
 			'title' => 'Breadcrumb Dropdowns',
 			'summary' => 'Adds dropdown menus to the breadcrumbs in ProcessPageEdit, ProcessTemplate and ProcessField.',
-			'version' => '0.3.2',
+			'version' => '0.3.3',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',
@@ -25,10 +25,11 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 
 	/**
 	 * "Add New" URLs for supported Processes
+	 * Inconsistent trailing slashes needed: https://github.com/processwire/processwire-issues/issues/1373
 	 */
 	protected $add_urls = [
-		'ProcessTemplate' => 'setup/template/add/',
-		'ProcessField' => 'setup/field/add/',
+		'ProcessTemplate' => 'setup/template/add',
+		'ProcessField' => 'setup/field/add',
 		'ProcessLanguage' => 'setup/languages/add/',
 		'ProcessRole' => 'access/roles/add/',
 		'ProcessPermission' => 'access/permissions/add/',
