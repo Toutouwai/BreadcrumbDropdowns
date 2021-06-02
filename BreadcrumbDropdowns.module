@@ -9,7 +9,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		return array(
 			'title' => 'Breadcrumb Dropdowns',
 			'summary' => 'Adds dropdown menus to the breadcrumbs in ProcessPageEdit, ProcessTemplate and ProcessField.',
-			'version' => '0.3.3',
+			'version' => '0.3.4',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',

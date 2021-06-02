@@ -1,6 +1,6 @@
-.uk-breadcrumb {
+.uk-breadcrumb { display:flex;
 	.pw-panel { margin-right:-8px; } // The uneven space after the tree icon bugs me
-	li { font-size:0.875rem; position:relative; }
+	li { font-size:0.875rem; position:relative; display:list-item; }
 	> li {
 		&::before { content:none !important; }
 	}
