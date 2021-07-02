@@ -9,7 +9,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		return array(
 			'title' => 'Breadcrumb Dropdowns',
 			'summary' => 'Adds dropdown menus to the breadcrumbs in ProcessPageEdit, ProcessTemplate and ProcessField.',
-			'version' => '0.3.4',
+			'version' => '0.3.5',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',
@@ -307,7 +307,6 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 			$out .= "<li>" . $atu->renderQuickTreeLink() . "</li>";
 		}
 
-		$admin_url = $this->wire()->config->urls->admin;
 		$is_process_user = $this->wire()->process == 'ProcessUser';
 		$breadcrumbs = $this->wire()->breadcrumbs;
 		$bc_count = $breadcrumbs->count;
@@ -323,7 +322,8 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 				$i++;
 				// Parent in this position exists and titles match
 				if($parent && $parent->title == $breadcrumb->title) {
-					$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span><a href='{$admin_url}page/?open={$parent->id}'>{$this->getBreadcrumbLabel($parent)}</a>";
+					$url = $this->getPageEditBreadcrumbUrl($parent);
+					$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span><a href='$url'>{$this->getBreadcrumbLabel($parent)}</a>";
 					$out .= $this->getBreadcrumbDropdown($parent) . "</li>";
 				}
 				// Unsupported breadcrumb, use AdminThemeUikit default breadcrumb
@@ -334,7 +334,8 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		}
 
 		// Add edited page as extra breadcrumb item
-		$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span><a href='{$admin_url}page/?open={$page->id}'>{$this->getBreadcrumbLabel($page)}</a>";
+		$url = $this->getPageEditBreadcrumbUrl($page);
+		$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span><a href='$url'>{$this->getBreadcrumbLabel($page)}</a>";
 		$out .= $this->getBreadcrumbDropdown($page) . "</li>";
 
 		// Add children as last dropdown
@@ -344,6 +345,21 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		}
 
 		return "<ul class='uk-breadcrumb'>$out</ul>";
+	}
+
+	/**
+	 * Get URL for a Page Edit breadcrumb
+	 *
+	 * @param Page $page
+	 * @return string
+	 */
+	protected function getPageEditBreadcrumbUrl(Page $page) {
+		$settings = $this->wire()->config->pageEdit;
+		if(!empty($settings['editCrumbs']) && $page->editable()) {
+			return "./?id=$page->id";
+		} else {
+			return "../?open=$page->id";
+		}
 	}
 
 	/**
