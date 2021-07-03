@@ -5,12 +5,13 @@
   .uk-breadcrumb li {
     font-size: 0.875rem;
     position: relative;
-    display: list-item; }
+    display: list-item;
+    color: #8d939e; }
   .uk-breadcrumb > li::before {
     content: none !important; }
   .uk-breadcrumb .dropdown-toggle {
     display: inline-block;
-    color: #d2d4d9;
+    color: #d2d4d9 !important;
     width: 21px;
     height: 21px;
     margin: 0 6px;
@@ -22,7 +23,7 @@
       bottom: 1px; }
     .uk-breadcrumb .dropdown-toggle:not(.no-dropdown):hover {
       background-color: #f0f3f7;
-      color: #354b60;
+      color: #354b60 !important;
       cursor: pointer; }
   .uk-breadcrumb .breadcrumb-dropdown {
     list-style: none;

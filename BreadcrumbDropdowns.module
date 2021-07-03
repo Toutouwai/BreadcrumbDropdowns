@@ -9,7 +9,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		return array(
 			'title' => 'Breadcrumb Dropdowns',
 			'summary' => 'Adds dropdown menus to the breadcrumbs in ProcessPageEdit, ProcessTemplate and ProcessField.',
-			'version' => '0.3.5',
+			'version' => '0.3.6',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',
@@ -165,7 +165,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		foreach($this->wire()->breadcrumbs as $breadcrumb) {
 			$out .= $this->atuBreadcrumb($breadcrumb);
 		}
-		return "<ul class='uk-breadcrumb'>$out</ul>";
+		return $out;
 	}
 
 	/**
@@ -469,7 +469,6 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 	 * @param InputfieldWrapper $inputfields
 	 */
 	public function getModuleConfigInputfields($inputfields) {
-
 		$modules = $this->wire()->modules;
 
 		/** @var InputfieldFieldset $fs */
