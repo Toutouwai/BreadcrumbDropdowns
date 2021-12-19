@@ -9,6 +9,8 @@
     color: #8d939e; }
   .uk-breadcrumb > li::before {
     content: none !important; }
+  .uk-breadcrumb > li #autosave-toggle {
+    margin-left: 14px; }
   .uk-breadcrumb .dropdown-toggle {
     display: inline-block;
     color: #d2d4d9 !important;

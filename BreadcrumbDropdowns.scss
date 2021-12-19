@@ -3,6 +3,8 @@
 	li { font-size:0.875rem; position:relative; display:list-item; color:#8d939e; }
 	> li {
 		&::before { content:none !important; }
+		// Page Autosave
+		#autosave-toggle { margin-left:14px; }
 	}
 	.dropdown-toggle { display:inline-block; color:#d2d4d9 !important; width:21px; height:21px; margin:0 6px; position:relative; bottom:-1px;
 		i { position:relative; left:2px; bottom:1px; }
