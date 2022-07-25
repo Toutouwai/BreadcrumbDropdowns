@@ -9,7 +9,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		return array(
 			'title' => 'Breadcrumb Dropdowns',
 			'summary' => 'Adds dropdown menus to the breadcrumbs in ProcessPageEdit, ProcessTemplate and ProcessField.',
-			'version' => '0.3.7',
+			'version' => '0.3.8',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',
@@ -159,7 +159,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 	 */
 	protected function atuBreadcrumbs(AdminThemeUikit $atu) {
 		$out = '';
-		if(strpos($this->layout, 'sidenav') === false) {
+		if(strpos($atu->layout, 'sidenav') === false) {
 			$out .= "<li>" . $atu->renderQuickTreeLink() . "</li>";
 		}
 		foreach($this->wire()->breadcrumbs as $breadcrumb) {
@@ -303,7 +303,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		$parents = $page->parents->reverse();
 
 		$out = '';
-		if(strpos($this->layout, 'sidenav') === false) {
+		if(strpos($atu->layout, 'sidenav') === false) {
 			$out .= "<li>" . $atu->renderQuickTreeLink() . "</li>";
 		}
 
