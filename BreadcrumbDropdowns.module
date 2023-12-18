@@ -9,7 +9,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		return array(
 			'title' => 'Breadcrumb Dropdowns',
 			'summary' => 'Adds dropdown menus to the breadcrumbs in ProcessPageEdit, ProcessTemplate and ProcessField.',
-			'version' => '0.3.8',
+			'version' => '0.3.9',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',
@@ -237,7 +237,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		if($template) {
 			$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span>{$template->name}<ul class='breadcrumb-dropdown'>";
 			// Templates
-			foreach($templates as $id => $template) {
+			foreach($templates->find("sort=name") as $id => $template) {
 				if($this->exclude_system_templates && $template->flags & Template::flagSystem) continue;
 				$class = $id === $template_id ? ' class="item-current"' : '';
 				$out .= "<li$class><a class='inner-item' href='{$url}?id={$id}'><span class='item-title'>{$template->name}</span></a></li>";
@@ -268,7 +268,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		if($field) {
 			$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span>{$field->name}<ul class='breadcrumb-dropdown'>";
 			// Fields
-			foreach($fields as $id => $field) {
+			foreach($fields->find("sort=name") as $id => $field) {
 				if($this->exclude_system_fields && $field->flags & Field::flagSystem) continue;
 				$class = $id === $field_id ? ' class="item-current"' : '';
 				$out .= "<li$class><a class='inner-item' href='{$url}?id={$id}'><span class='item-title'>{$field->name}</span></a></li>";
