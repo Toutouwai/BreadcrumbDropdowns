@@ -9,7 +9,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		return array(
 			'title' => 'Breadcrumb Dropdowns',
 			'summary' => 'Adds dropdown menus to the breadcrumbs in ProcessPageEdit, ProcessTemplate and ProcessField.',
-			'version' => '0.3.9',
+			'version' => '0.3.10',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',
@@ -39,6 +39,14 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 	 * Label for "Add New" links
 	 */
 	protected $add_label;
+
+	/**
+	 * Construct
+	 */
+	public function __construct() {
+		$this->add_new_position = 'bottom';
+		parent::__construct();
+	}
 
 	/**
 	 * Ready
@@ -213,7 +221,12 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		// Add New
 		if(!empty($this->add_urls[$process])) {
 			$add_new_url = $this->wire()->config->urls->admin . $this->add_urls[$process];
-			$dropdown .= "<li class='add-new'><a class='inner-item' href='{$add_new_url}'><i class='fa fa-fw fa-plus-circle'></i>{$this->add_label}</a></li>";
+			$add_new = "<li class='add-new'><a class='inner-item' href='{$add_new_url}'><i class='fa fa-fw fa-plus-circle'></i>{$this->add_label}</a></li>";
+			if($this->add_new_position === 'top') {
+				$dropdown = $add_new . $dropdown;
+			} else {
+				$dropdown = $dropdown . $add_new;
+			}
 		}
 		// Breadcrumb for current page
 		if($dropdown) $out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span>{$current}<ul class='breadcrumb-dropdown'>$dropdown</ul></li>";
@@ -237,14 +250,20 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		if($template) {
 			$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span>{$template->name}<ul class='breadcrumb-dropdown'>";
 			// Templates
+			$items_out = '';
 			foreach($templates->find("sort=name") as $id => $template) {
 				if($this->exclude_system_templates && $template->flags & Template::flagSystem) continue;
 				$class = $id === $template_id ? ' class="item-current"' : '';
-				$out .= "<li$class><a class='inner-item' href='{$url}?id={$id}'><span class='item-title'>{$template->name}</span></a></li>";
+				$items_out .= "<li$class><a class='inner-item' href='{$url}?id={$id}'><span class='item-title'>{$template->name}</span></a></li>";
 			}
 			// Add New
 			$add_new_url = $this->wire()->config->urls->admin . $this->add_urls['ProcessTemplate'];
-			$out .= "<li class='add-new'><a class='inner-item' href='{$add_new_url}'><i class='fa fa-fw fa-plus-circle'></i>{$this->add_label}</a></li>";
+			$add_new = "<li class='add-new'><a class='inner-item' href='{$add_new_url}'><i class='fa fa-fw fa-plus-circle'></i>{$this->add_label}</a></li>";
+			if($this->add_new_position === 'top') {
+				$out .= $add_new . $items_out;
+			} else {
+				$out .= $items_out . $add_new;
+			}
 			$out .= "</ul></li>";
 		}
 
@@ -268,14 +287,20 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		if($field) {
 			$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span>{$field->name}<ul class='breadcrumb-dropdown'>";
 			// Fields
+			$items_out = '';
 			foreach($fields->find("sort=name") as $id => $field) {
 				if($this->exclude_system_fields && $field->flags & Field::flagSystem) continue;
 				$class = $id === $field_id ? ' class="item-current"' : '';
-				$out .= "<li$class><a class='inner-item' href='{$url}?id={$id}'><span class='item-title'>{$field->name}</span></a></li>";
+				$items_out .= "<li$class><a class='inner-item' href='{$url}?id={$id}'><span class='item-title'>{$field->name}</span></a></li>";
 			}
 			// Add New
-			$add_new_url = $this->wire()->config->urls->admin . $this->add_urls['ProcessField'];;
-			$out .= "<li class='add-new'><a class='inner-item' href='{$add_new_url}'><i class='fa fa-fw fa-plus-circle'></i>{$this->add_label}</a></li>";
+			$add_new_url = $this->wire()->config->urls->admin . $this->add_urls['ProcessField'];
+			$add_new = "<li class='add-new'><a class='inner-item' href='{$add_new_url}'><i class='fa fa-fw fa-plus-circle'></i>{$this->add_label}</a></li>";
+			if($this->add_new_position === 'top') {
+				$out .= $add_new . $items_out;
+			} else {
+				$out .= $items_out . $add_new;
+			}
 			$out .= "</ul></li>";
 		}
 
@@ -406,7 +431,12 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 			} else {
 				$add_new_url = "{$admin_url}page/add/?parent_id={$parent->id}";
 			}
-			$out .= "<li class='add-new'><a class='inner-item' href='$add_new_url'><i class='fa fa-fw fa-plus-circle'></i>{$this->add_label}</a></li>";
+			$add_new = "<li class='add-new'><a class='inner-item' href='$add_new_url'><i class='fa fa-fw fa-plus-circle'></i>{$this->add_label}</a></li>";
+			if($this->add_new_position === 'top') {
+				$out = $add_new . $out;
+			} else {
+				$out = $out . $add_new;
+			}
 		}
 
 		// Add a note if no dropdown markup
@@ -542,6 +572,17 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		$f->showIf = 'disable_for_fields!=1';
 		$f->checked = $this->$f_name === 1 ? 'checked' : '';
 		$fs->add($f);
+
+		/** @var InputfieldRadios $f */
+		$f = $modules->get('InputfieldRadios');
+		$f_name = 'add_new_position';
+		$f->name = $f_name;
+		$f->label = $this->_('"Add new" position');
+		$f->addOption('bottom', $this->_('Bottom'));
+		$f->addOption('top', $this->_('Top'));
+		$f->optionColumns = 1;
+		$f->value = $this->$f_name;
+		$inputfields->add($f);
 
 		/** @var InputfieldTextarea $f */
 		$f = $modules->InputfieldTextarea;
