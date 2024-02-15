@@ -43,10 +43,6 @@
       display: block; }
     .uk-breadcrumb .breadcrumb-dropdown li.item-current .inner-item {
       color: #e83561; }
-    .uk-breadcrumb .breadcrumb-dropdown li.item-hidden .item-title {
-      opacity: 0.6; }
-    .uk-breadcrumb .breadcrumb-dropdown li.item-unpublished {
-      text-decoration: line-through; }
     .uk-breadcrumb .breadcrumb-dropdown li.add-new a {
       background-color: #e7f6f2; }
       .uk-breadcrumb .breadcrumb-dropdown li.add-new a:hover {
@@ -67,3 +63,7 @@
     .uk-breadcrumb .breadcrumb-dropdown li a:hover {
       text-decoration: none;
       background-color: #f0f3f7; }
+  .uk-breadcrumb .status-hidden {
+    opacity: 0.6; }
+  .uk-breadcrumb .status-unpublished {
+    text-decoration: line-through; }

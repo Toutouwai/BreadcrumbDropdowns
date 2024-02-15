@@ -9,7 +9,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		return array(
 			'title' => 'Breadcrumb Dropdowns',
 			'summary' => 'Adds dropdown menus to the breadcrumbs in ProcessPageEdit, ProcessTemplate and ProcessField.',
-			'version' => '0.3.10',
+			'version' => '0.3.11',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',
@@ -325,6 +325,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		/** @var Page $page */
 		$page = $this->wire()->process->getPage();
 		// Get parents of edited page in reverse order
+		/** @var PageArray $parents */
 		$parents = $page->parents->reverse();
 
 		$out = '';
@@ -348,7 +349,9 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 				// Parent in this position exists and titles match
 				if($parent && $parent->title == $breadcrumb->title) {
 					$url = $this->getPageEditBreadcrumbUrl($parent);
-					$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span><a href='$url'>{$this->getBreadcrumbLabel($parent)}</a>";
+					$label = $this->getBreadcrumbLabel($parent);
+					if($this->use_status_styling) $label = $this->getStatusLabel($parent, $label);
+					$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span><a href='$url'>$label</a>";
 					$out .= $this->getBreadcrumbDropdown($parent) . "</li>";
 				}
 				// Unsupported breadcrumb, use AdminThemeUikit default breadcrumb
@@ -410,15 +413,13 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		if($sibling->id) {
 			foreach($this->getSiblings($sibling) as $p) {
 				$class = '';
-				$classes = array();
-				if(!$is_parent && $p === $sibling) $classes[] = 'item-current';
-				if($p->hasStatus('unpublished')) $classes[] = 'item-unpublished';
-				if($p->hasStatus('hidden')) $classes[] = 'item-hidden';
-				if(count($classes)) $class = " class='" . implode(' ', $classes) . "'";
+				if(!$is_parent && $p === $sibling) $class = " class='item-current'";
+				$label = $this->getBreadcrumbLabel($p);
+				$label = $this->getStatusLabel($p, $label);
 				if($p->editable) {
-					$out .= "<li$class><a class='inner-item' href='$p->editUrl'><span class='item-title'>{$this->getBreadcrumbLabel($p)}</span></a></li>";
+					$out .= "<li$class><a class='inner-item' href='$p->editUrl'><span class='item-title'>$label</span></a></li>";
 				} elseif($this->show_uneditable && !in_array($p->template->id, $config->userTemplateIDs)) {
-					$out .= "<li$class><span class='inner-item uneditable'><span class='item-title'>{$this->getBreadcrumbLabel($p)}</span></span></li>";
+					$out .= "<li$class><span class='inner-item uneditable'><span class='item-title'>$label</span></span></li>";
 				}
 			}
 		}
@@ -482,15 +483,33 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 	 * Get breadcrumb label
 	 *
 	 * @param Page $page
-	 * @return int
+	 * @return string
 	 */
 	protected function getBreadcrumbLabel($page) {
 		if($this->use_page_list_labels) {
 			// Call ProcessPageListRender::getPageLabel without triggering hooks
-			return $this->pplrj->___getPageLabel($page, array('noTags' => true, 'noIcon' => true));
+			return $this->pplrj->___getPageLabel($page, ['noTags' => true, 'noIcon' => true]);
 		} else {
 			return $this->wire()->sanitizer->entities1($page->get('title|name'));
 		}
+	}
+
+	/**
+	 * Get label with wrapping markup indicating hidden/unpublished page status if any
+	 *
+	 * @param Page $page
+	 * @param string $label
+	 * @return string
+	 */
+	protected function getStatusLabel($page, $label) {
+		$classes = [];
+		if($page->hasStatus('hidden')) $classes[] = 'status-hidden';
+		if($page->hasStatus('unpublished')) $classes[] = 'status-unpublished';
+		if($classes) {
+			$class = implode(' ', $classes);
+			$label = "<span class='$class'>$label</span>";
+		}
+		return $label;
 	}
 
 	/**
@@ -507,20 +526,30 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		$inputfields->add($fs);
 
 		/** @var InputfieldCheckbox $f */
-		$f = $modules->InputfieldCheckbox;
+		$f = $modules->get('InputfieldCheckbox');
 		$f_name = 'show_uneditable';
 		$f->name = $f_name;
 		$f->label = $this->_('Include uneditable pages in dropdowns');
+		$f->columnWidth = 100;
+		$f->checked = $this->$f_name === 1 ? 'checked' : '';
+		$fs->add($f);
+
+		/** @var InputfieldCheckbox $f */
+		$f = $modules->get('InputfieldCheckbox');
+		$f_name = 'use_page_list_labels';
+		$f->name = $f_name;
+		$f->label = $this->_('Use custom labels defined for Page List');
+		$f->notes = $this->_('If checked any custom template setting for "List of fields to display in the admin Page List" will be used for the breadcrumbs and dropdowns.');
 		$f->columnWidth = 50;
 		$f->checked = $this->$f_name === 1 ? 'checked' : '';
 		$fs->add($f);
 
 		/** @var InputfieldCheckbox $f */
-		$f = $modules->InputfieldCheckbox;
-		$f_name = 'use_page_list_labels';
+		$f = $modules->get('InputfieldCheckbox');
+		$f_name = 'use_status_styling';
 		$f->name = $f_name;
-		$f->label = $this->_('Use custom labels defined for Page List');
-		$f->notes = $this->_('If checked any custom template setting for "List of fields to display in the admin Page List" will be used for the breadcrumbs and dropdowns.');
+		$f->label = $this->_('Style hidden and unpublished pages in breadcrumb menu');
+		$f->notes = $this->_('Applies reduced opacity and strikethrough text styling according to page status.');
 		$f->columnWidth = 50;
 		$f->checked = $this->$f_name === 1 ? 'checked' : '';
 		$fs->add($f);
@@ -531,7 +560,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		$inputfields->add($fs);
 
 		/** @var InputfieldCheckbox $f */
-		$f = $modules->InputfieldCheckbox;
+		$f = $modules->get('InputfieldCheckbox');
 		$f_name = 'disable_for_templates';
 		$f->name = $f_name;
 		$f->label = $this->_('Disable dropdowns');
@@ -540,7 +569,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		$fs->add($f);
 
 		/** @var InputfieldCheckbox $f */
-		$f = $modules->InputfieldCheckbox;
+		$f = $modules->get('InputfieldCheckbox');
 		$f_name = 'exclude_system_templates';
 		$f->name = $f_name;
 		$f->label = $this->_('Exclude system templates');
@@ -555,7 +584,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		$inputfields->add($fs);
 
 		/** @var InputfieldCheckbox $f */
-		$f = $modules->InputfieldCheckbox;
+		$f = $modules->get('InputfieldCheckbox');
 		$f_name = 'disable_for_fields';
 		$f->name = $f_name;
 		$f->label = $this->_('Disable dropdowns');
@@ -564,7 +593,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		$fs->add($f);
 
 		/** @var InputfieldCheckbox $f */
-		$f = $modules->InputfieldCheckbox;
+		$f = $modules->get('InputfieldCheckbox');
 		$f_name = 'exclude_system_fields';
 		$f->name = $f_name;
 		$f->label = $this->_('Exclude system fields');
@@ -585,7 +614,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		$inputfields->add($f);
 
 		/** @var InputfieldTextarea $f */
-		$f = $modules->InputfieldTextarea;
+		$f = $modules->get('InputfieldTextarea');
 		$f_name = 'custom_hooks';
 		$f->name = $f_name;
 		$f->label = $this->_('Custom hooks');

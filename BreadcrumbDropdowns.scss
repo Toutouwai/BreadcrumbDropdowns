@@ -16,10 +16,6 @@
 			&.item-current {
 				.inner-item { color:#e83561; }
 			}
-			&.item-hidden {
-				.item-title { opacity:0.6; }
-			}
-			&.item-unpublished { text-decoration:line-through; }
 			&.add-new {
 				a { background-color:#e7f6f2;
 					&:hover { background-color:#d6f2ea; }
@@ -33,6 +29,8 @@
 			a:hover { text-decoration:none; background-color:#f0f3f7; }
 		}
 	}
+	.status-hidden { opacity:0.6; }
+	.status-unpublished { text-decoration:line-through; }
 }
 // !important styles above are necessary due to Uikit style (shown here for reference)
 // .uk-breadcrumb > :last-child > span, .uk-breadcrumb > :last-child > a:not([href]) { color:#354b60; }
