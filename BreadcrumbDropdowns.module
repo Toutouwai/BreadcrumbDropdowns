@@ -363,7 +363,9 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 
 		// Add edited page as extra breadcrumb item
 		$url = $this->getPageEditBreadcrumbUrl($page);
-		$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span><a href='$url'>{$this->getBreadcrumbLabel($page)}</a>";
+		$label = $this->getBreadcrumbLabel($page);
+		if($this->use_status_styling) $label = $this->getStatusLabel($page, $label);
+		$out .= "<li><span class='dropdown-toggle'><i class='fa fa-fw fa-angle-right'></i></span><a href='$url'>$label</a>";
 		$out .= $this->getBreadcrumbDropdown($page) . "</li>";
 
 		// Add children as last dropdown
