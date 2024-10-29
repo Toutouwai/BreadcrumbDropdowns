@@ -1,12 +1,12 @@
-.uk-breadcrumb { display:flex;
+.uk-breadcrumb { display:flex; flex-wrap:wrap;
 	.pw-panel { margin-right:-8px; } // The uneven space after the tree icon bugs me
 	li { font-size:0.875rem; position:relative; display:list-item; color:#8d939e; }
-	> li {
+	> li { display:flex;
 		&::before { content:none !important; }
 		// Page Autosave
 		#autosave-toggle { margin-left:14px; }
 	}
-	.dropdown-toggle { display:inline-block; color:#d2d4d9 !important; width:21px; height:21px; margin:0 6px; position:relative; bottom:-1px;
+	.dropdown-toggle { color:#d2d4d9 !important; width:21px; height:21px; margin:0 6px; position:relative; bottom:-1px;
 		i { position:relative; left:2px; bottom:1px; }
 		&:not(.no-dropdown):hover { background-color:#f0f3f7; color:#354b60 !important; cursor:pointer; }
 	}
@@ -31,6 +31,8 @@
 	}
 	.status-hidden { opacity:0.6; }
 	.status-unpublished { text-decoration:line-through; }
+	// Prevent excessively long breadcrumb items
+	a { white-space:nowrap; text-overflow:ellipsis; max-width:440px; overflow:hidden; }
 }
 // !important styles above are necessary due to Uikit style (shown here for reference)
 // .uk-breadcrumb > :last-child > span, .uk-breadcrumb > :last-child > a:not([href]) { color:#354b60; }

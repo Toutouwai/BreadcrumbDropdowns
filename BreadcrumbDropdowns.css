@@ -1,5 +1,6 @@
 .uk-breadcrumb {
-  display: flex; }
+  display: flex;
+  flex-wrap: wrap; }
   .uk-breadcrumb .pw-panel {
     margin-right: -8px; }
   .uk-breadcrumb li {
@@ -7,12 +8,13 @@
     position: relative;
     display: list-item;
     color: #8d939e; }
-  .uk-breadcrumb > li::before {
-    content: none !important; }
-  .uk-breadcrumb > li #autosave-toggle {
-    margin-left: 14px; }
+  .uk-breadcrumb > li {
+    display: flex; }
+    .uk-breadcrumb > li::before {
+      content: none !important; }
+    .uk-breadcrumb > li #autosave-toggle {
+      margin-left: 14px; }
   .uk-breadcrumb .dropdown-toggle {
-    display: inline-block;
     color: #d2d4d9 !important;
     width: 21px;
     height: 21px;
@@ -67,3 +69,8 @@
     opacity: 0.6; }
   .uk-breadcrumb .status-unpublished {
     text-decoration: line-through; }
+  .uk-breadcrumb a {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 440px;
+    overflow: hidden; }
