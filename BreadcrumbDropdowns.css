@@ -41,6 +41,8 @@
     border: 1px solid #d9e1ea;
     border-bottom: none;
     display: none; }
+    body.AdminThemeUikitDefault .uk-breadcrumb .breadcrumb-dropdown {
+      overflow-y: auto; }
     .uk-breadcrumb .breadcrumb-dropdown.visible {
       display: block; }
     .uk-breadcrumb .breadcrumb-dropdown li.item-current .inner-item {

@@ -11,6 +11,7 @@
 		&:not(.no-dropdown):hover { background-color:#f0f3f7; color:#354b60 !important; cursor:pointer; }
 	}
 	.breadcrumb-dropdown { list-style:none; background-color:#fff; position:absolute; left:6px; top:28px; z-index:199; padding:0; box-shadow:0 1px 7px rgba(0,0,0,.175); border:1px solid #d9e1ea; border-bottom:none; display:none;
+		body.AdminThemeUikitDefault & { overflow-y:auto; }
 		&.visible { display:block; }
 		li {
 			&.item-current {
