@@ -9,7 +9,7 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 		return array(
 			'title' => 'Breadcrumb Dropdowns',
 			'summary' => 'Adds dropdown menus to the breadcrumbs in ProcessPageEdit, ProcessTemplate and ProcessField.',
-			'version' => '0.3.14',
+			'version' => '0.3.15',
 			'author' => 'Robin Sallis',
 			'href' => 'https://github.com/Toutouwai/BreadcrumbDropdowns',
 			'icon' => 'bars',
@@ -492,8 +492,8 @@ class BreadcrumbDropdowns extends WireData implements Module, ConfigurableModule
 			// Call ProcessPageListRender::getPageLabel without triggering hooks
 			return $this->pplrj->___getPageLabel($page, ['noTags' => true, 'noIcon' => true]);
 		} else {
-			$label = $page->title;
-			if(!$label) $label = $page->name;
+			$label = (string) $page->title;
+			if(!strlen($label)) $label = $page->name;
 			return $this->wire()->sanitizer->entities1($label);
 		}
 	}
