@@ -1,33 +1,33 @@
 .uk-breadcrumb { display:flex; flex-wrap:wrap;
 	.pw-panel { margin-right:-8px; } // The uneven space after the tree icon bugs me
-	li { font-size:0.875rem; position:relative; display:list-item; color:#8d939e; }
+	li { font-size:0.875rem; position:relative; display:list-item; color:var(--pw-muted-color, #8d939e); }
 	> li { display:flex;
 		&::before { content:none !important; }
 		// Page Autosave
 		#autosave-toggle { margin-left:14px; }
 	}
-	.dropdown-toggle { color:#d2d4d9 !important; width:21px; height:21px; margin:0 6px; position:relative; bottom:-1px;
+	.dropdown-toggle { color:var(--pw-muted-color, #d2d4d9) !important; width:21px; height:21px; margin:0 6px; position:relative; bottom:-1px;
 		i { position:relative; left:2px; bottom:1px; }
-		&:not(.no-dropdown):hover { background-color:#f0f3f7; color:#354b60 !important; cursor:pointer; }
+		&:not(.no-dropdown):hover { background-color:var(--pw-masthead-background, #f0f3f7); color:var(--pw-muted-color, #354b60) !important; cursor:pointer; }
 	}
-	.breadcrumb-dropdown { list-style:none; background-color:#fff; position:absolute; left:6px; top:28px; z-index:199; padding:0; box-shadow:0 1px 7px rgba(0,0,0,.175); border:1px solid #d9e1ea; border-bottom:none; display:none;
+	.breadcrumb-dropdown { list-style:none; background-color:var(--pw-masthead-background, #fff); position:absolute; left:6px; top:28px; z-index:199; padding:0; box-shadow:var(--pw-masthead-border-color, 0 1px 7px rgba(0, 0, 0, 0.175)); border:1px solid var(--pw-masthead-border-color, #d9e1ea); border-bottom:none; display:none;
 		body.AdminThemeUikitDefault & { overflow-y:auto; }
 		&.visible { display:block; }
 		li {
 			&.item-current {
-				.inner-item { color:#e83561; }
+				.inner-item { color:var(--pw-main-color, #e83561); }
 			}
 			&.add-new {
-				a { background-color:#e7f6f2;
-					&:hover { background-color:#d6f2ea; }
+				a { background-color:var(--pw-masthead-background, #e7f6f2);
+					&:hover { background-color:var(--pw-masthead-menu-item-background-hover, #d6f2ea); }
 				}
-				i { color:#3eb998; margin-left:-3px; }
+				i { color:#3eb998; margin-right: 5px; margin-left:-3px; }
 			}
-			.inner-item { color:#354b60; display:block; white-space:nowrap; padding:2px 10px 3px; border-bottom:1px solid #d9e1ea; }
+			.inner-item { color:var(--pw-masthead-active-color, #354b60); display:block; white-space:nowrap; padding:4px 12px 5px; border-bottom:1px solid var(--pw-masthead-border-color, #d9e1ea); }
 			.uneditable {
 				.item-title { cursor:not-allowed; font-style:italic; opacity:0.6; }
 			}
-			a:hover { text-decoration:none; background-color:#f0f3f7; }
+			a:hover { text-decoration:none; background-color:var(--pw-masthead-background, #f0f3f7); }
 		}
 	}
 	.status-hidden { opacity:0.6; }
@@ -36,4 +36,4 @@
 	a { white-space:nowrap; text-overflow:ellipsis; max-width:440px; overflow:hidden; }
 }
 // !important styles above are necessary due to Uikit style (shown here for reference)
-// .uk-breadcrumb > :last-child > span, .uk-breadcrumb > :last-child > a:not([href]) { color:#354b60; }
+// .uk-breadcrumb > :last-child > span, .uk-breadcrumb > :last-child > a:not([href]) { color:var(--pw-muted-color, #354b60); }
